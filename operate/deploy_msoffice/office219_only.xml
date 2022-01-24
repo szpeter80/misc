@@ -1,5 +1,5 @@
 <Configuration ID="df6935ae-2660-443b-b37d-75e41c2d0c99">
-  <Info Description="Off2019 + Visio" />
+  <Info Description="Off2019 only" />
   <Add OfficeClientEdition="64" Channel="Current" Channel_bak="PerpetualVL2019">
     <Product ID="ProPlus2019Retail" PIDKEY="###OFFICE-KEY-GOES-HERE###">
       <Language ID="en-us" />
