@@ -1,0 +1,5 @@
+# https://www.postgresql.org/docs/current/libpq-pgpass.html
+# Format: hostname:port:database:username:password
+# Permissions required: chmod 0600 ./pgpass.txt
+
+
