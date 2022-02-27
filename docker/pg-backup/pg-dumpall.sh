@@ -11,7 +11,7 @@ vacuumdb ${CRED_ARGS} --all --full --quiet --analyze
 
 DUMP_FN=${DATA_DIR}/$(${CMD_DATETIME_FN})-globals.sql.txt
 echo "$(date "+%Y-%m-%d %H:%M:%S") Dumping global objects to ${DUMP_FN} ...";
-pg_dumpall ${CRED_ARGS} --globals-only > ${DUMP_FN}
+pg_dumpall ${CRED_ARGS} --clean --if-exists --globals-only > ${DUMP_FN}
 
 echo -e "$(date "+%Y-%m-%d %H:%M:%S") Maintenance finished\n";
 
