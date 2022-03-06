@@ -17,7 +17,7 @@ case "$1" in
     ;;
 esac
 
-NC_CMD="${NC_CMD} -u $3 $4"
+NC_CMD="${NC_CMD} $3 $4"
 
 while true;
 do

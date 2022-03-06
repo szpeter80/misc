@@ -5,8 +5,6 @@
 ###
 ### Files processed:
 ###     connection.env         - variables definitions for this connection
-###     port_forward_ovpn.txt  - ports to forward by netcat for OpenVPN 
-###     port_forward_ssh.txt   - ports to forward by ssh 
 ###
 
 CONN_NAME="Foo connection"
@@ -16,12 +14,16 @@ if [ -f "./connection.env" ];
 then
     # shellcheck source=/dev/null
     source ./connection.env
+else 
+    exit 0
 fi;
+
+echo -e "\t$CONN_NAME ($(pwd))"
 
 if [ -f "${CONN_OVPN_CFG}" ]
 then
 
-    echo "Starting $CONN_NAME - OpenVPN"
+    echo -e "\t\tOpenVPN instance"
 
 # --verb n        : Set output verbosity to n (default=1): 
 #                   (Level 3 is recommended if you want a good summary 
@@ -41,14 +43,4 @@ then
         --writepid "./openvpn.pid" \
         --verb 3
 
-    if [ -f "./port_forward_ovpn.txt" ]
-    then
-        grep -v '#' < ./port_forward_ovpn.txt | \
-        while IFS=: read -r PROTO LOCAL_PORT REMOTE_HOST REMOTE_PORT; do
-            start-netcat.sh \
-                "${PROTO}" "${LOCAL_PORT}" "${REMOTE_HOST}" "${REMOTE_PORT}" \
-                > "${PROTO}_${LOCAL_PORT}_${REMOTE_HOST}_${REMOTE_PORT}.log" \
-                2>&1 &
-        done 
-    fi;
 fi;
