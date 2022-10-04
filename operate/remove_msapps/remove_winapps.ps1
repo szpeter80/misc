@@ -7,7 +7,11 @@ Get-AppxPackage -AllUsers Microsoft.549981C3F5F10 | Remove-AppxPackage
 
 Get-AppxPackage -AllUsers Microsoft.SkypeApp* | Remove-AppxPackage
 Get-AppxPackage -AllUsers Microsoft.Zune* | Remove-AppxPackage
+
+# You can always install later if you have subscription
 Get-AppxPackage -AllUsers Spotify* | Remove-AppxPackage
+Get-AppxPackage -AllUsers Disney* | Remove-AppxPackage
+
 Get-AppxPackage -AllUsers Microsoft.YourPhone* | Remove-AppxPackage
 Get-AppxPackage -AllUsers Microsoft.Xbox* | Remove-AppxPackage
 Get-AppxPackage -AllUsers Microsoft.BioEnrollment* | Remove-AppxPackage
@@ -29,3 +33,5 @@ Get-AppxPackage -AllUsers Microsoft.WindowsFeedbackHub* | Remove-AppxPackage
 
 Get-AppxPackage -AllUsers Microsoft.MicrosoftOfficeHub* | Remove-AppxPackage
 Get-AppxPackage -AllUsers Microsoft.Office.OneNote* | Remove-AppxPackage
+
+                              Disney.37853FC22B2CE_1.38.2.0_x64__6rarf9sa4v8jt
