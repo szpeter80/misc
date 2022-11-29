@@ -5,7 +5,7 @@ This repository contains various small items, which are shared with the intentio
 
 ## Cheatsheet
 
-C# and Python quick reference
+C#, Python and Powershell quick reference
 
 ## Operate
 
