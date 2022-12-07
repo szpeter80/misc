@@ -63,7 +63,7 @@ DOCKER_CMD="docker save ${TAG} | pv | ssh ${REMOTE_DOCKERUSER}@${REMOTE_DOCKERHO
 if [[ $# -eq 1  && "$1" == "export" ]]; then
     echo -e "\n\nExporting the image to remote host";
     # pipes are escaped by the shell and given args to the 1st program
-    bash -c "$DOCKER_CMD"
+    bash -c "${DOCKER_CMD}"
 else
     echo -e "\n\nThe image can be exported by executing";
     echo -e "${DOCKER_CMD}";

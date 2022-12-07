@@ -1,7 +1,7 @@
 ### Dockerfile notes 
 
 
-FROM docker.io/library/ubuntu:20.04
+FROM docker.io/library/ubuntu:22.04
 
 # OCI Annotations from https://github.com/opencontainers/image-spec/blob/master/annotations.md
 
@@ -31,8 +31,8 @@ ENV ZBX_LOGREMOTECOMMANDS=1
 ENV ZBX_STATSALLOWEDIP="127.0.0.1,::1,dummy-zabbix.lan"
 ENV X_ZBX_SOURCEIP="Set ZBX_SOURCEIP to a value if you neet to specify the outgoing address"
 
-ARG X_ZABBIX_REPO_URL="https://repo.zabbix.com/zabbix/6.0/ubuntu/pool/main/z/zabbix-release"
-ARG X_ZABBIX_REPO_PKG="zabbix-release_6.0-1+ubuntu20.04_all.deb"
+ARG X_ZABBIX_REPO_URL="https://repo.zabbix.com/zabbix/6.2/ubuntu/pool/main/z/zabbix-release"
+ARG X_ZABBIX_REPO_PKG="zabbix-release_6.2-4+ubuntu22.04_all.deb"
 
 ARG RUNTIME_PKGS=" \
             tzdata \
