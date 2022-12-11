@@ -1,6 +1,6 @@
 zabbix_export:
   version: '6.2'
-  date: '2022-12-11T17:03:43Z'
+  date: '2022-12-11T17:20:24Z'
   template_groups:
     -
       uuid: 846977d1dfed4968bc5f8bdb363285bc
@@ -20,7 +20,7 @@ zabbix_export:
         
         Tested on PFSense 2.6, but should work on lower versions as well, if the mibs are supported by the SNMP agent.
         
-        Limitation: the template does not provide the "zabbix[host,snmp,available]" key, which is already provided by the PFSense template. So, standalone use might be not practical of this template.
+        Limitation: the template cannot provide an item for the SNMP agent's status, because the "zabbix_internal" type item key "zabbix[host,snmp,available]" is already used by the "PFSense by SNMP" template. So,it is not possible to depend a trigger on the agent health. This might not cause much harm as all snmp checks become unsupported when the agent is down and when no data collected, triggers will not fire (they need incoming data to trigger on).
         
         MIBs used:
         HOST-RESOURCES-MIB
@@ -1202,19 +1202,6 @@ zabbix_export:
             -
               value: '2'
               newvalue: 'false'
-        -
-          uuid: 1738e54cd93d4cd0b5cf23e87aa0fb7d
-          name: zabbix.host.available
-          mappings:
-            -
-              value: '0'
-              newvalue: 'not available'
-            -
-              value: '1'
-              newvalue: available
-            -
-              value: '2'
-              newvalue: unknown
   triggers:
     -
       uuid: 747b66fd987a44309d07e13147c9192b
