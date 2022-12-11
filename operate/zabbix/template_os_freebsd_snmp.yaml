@@ -1,0 +1,1308 @@
+zabbix_export:
+  version: '6.2'
+  date: '2022-12-11T17:03:43Z'
+  template_groups:
+    -
+      uuid: 846977d1dfed4968bc5f8bdb363285bc
+      name: 'Templates/Operating systems'
+  templates:
+    -
+      uuid: 7eb4246b77024920b0ed2a96d400f91c
+      template: 'FreeBSD by SNMP'
+      name: 'FreeBSD by SNMP'
+      description: |
+        The functionality of this template was taken from the original "PFSense SNMP" template, with the intention to separate and add back the functionality removed by the commit 803ac56d41c at 06 Jun 2022 :
+        
+        https://git.zabbix.com/projects/ZBX/repos/zabbix/commits/803ac56d41c956f4a95de36fce684433136cd0f1#ChangeLog.d/bugfix/ZBX-20628
+        
+        
+        This template is meant to co-exist with "PFSense by SNMP" to monitor the host OS parameters via SNMP. 
+        
+        Tested on PFSense 2.6, but should work on lower versions as well, if the mibs are supported by the SNMP agent.
+        
+        Limitation: the template does not provide the "zabbix[host,snmp,available]" key, which is already provided by the PFSense template. So, standalone use might be not practical of this template.
+        
+        MIBs used:
+        HOST-RESOURCES-MIB
+        SNMPv2-MIB
+        UCD-DISKIO-MIB
+        UCD-SNMP-MIB
+      groups:
+        -
+          name: 'Templates/Operating systems'
+      items:
+        -
+          uuid: 7858b813b9a94c8690fc18be0a497152
+          name: 'FreeBSD: ICMP ping'
+          type: SIMPLE
+          key: icmpping
+          history: 7d
+          description: |
+            Host accessibility by ICMP.
+            0 - ICMP ping fails.
+            1 - ICMP ping successful.
+          valuemap:
+            name: 'Service state'
+          tags:
+            -
+              tag: component
+              value: health
+            -
+              tag: component
+              value: network
+          triggers:
+            -
+              uuid: 0db9f44738834a788d1aa258482d4c91
+              expression: 'max(/FreeBSD by SNMP/icmpping,#3)=0'
+              name: 'FreeBSD: Unavailable by ICMP ping'
+              priority: HIGH
+              description: 'Last three attempts returned timeout.  Please check device connectivity.'
+              tags:
+                -
+                  tag: scope
+                  value: availability
+        -
+          uuid: 1861ff26147540b38569d6f0d21ba707
+          name: 'FreeBSD: ICMP loss'
+          type: SIMPLE
+          key: icmppingloss
+          history: 7d
+          value_type: FLOAT
+          units: '%'
+          description: 'Percentage of lost packets.'
+          tags:
+            -
+              tag: component
+              value: health
+            -
+              tag: component
+              value: network
+          triggers:
+            -
+              uuid: 304c569bc4c046b4bb2750fbfc7ba0c4
+              expression: 'min(/FreeBSD by SNMP/icmppingloss,5m)>{$ICMP_LOSS_WARN} and min(/FreeBSD by SNMP/icmppingloss,5m)<100'
+              name: 'FreeBSD: High ICMP ping loss'
+              opdata: 'Loss: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              description: 'ICMP packets loss detected.'
+              dependencies:
+                -
+                  name: 'FreeBSD: Unavailable by ICMP ping'
+                  expression: 'max(/FreeBSD by SNMP/icmpping,#3)=0'
+              tags:
+                -
+                  tag: scope
+                  value: availability
+                -
+                  tag: scope
+                  value: performance
+        -
+          uuid: a2d3d4e059474dda87c25609541489c3
+          name: 'FreeBSD: ICMP response time'
+          type: SIMPLE
+          key: icmppingsec
+          history: 7d
+          value_type: FLOAT
+          units: s
+          description: 'ICMP ping response time (in seconds).'
+          tags:
+            -
+              tag: component
+              value: health
+            -
+              tag: component
+              value: network
+          triggers:
+            -
+              uuid: 4cd1608c824d430087c3b6f43d73e6fd
+              expression: 'avg(/FreeBSD by SNMP/icmppingsec,5m)>{$ICMP_RESPONSE_TIME_WARN}'
+              name: 'FreeBSD: High ICMP ping response time'
+              opdata: 'Value: {ITEM.LASTVALUE1}'
+              priority: WARNING
+              description: 'Average ICMP response time is too big.'
+              dependencies:
+                -
+                  name: 'FreeBSD: Unavailable by ICMP ping'
+                  expression: 'max(/FreeBSD by SNMP/icmpping,#3)=0'
+              tags:
+                -
+                  tag: scope
+                  value: availability
+                -
+                  tag: scope
+                  value: performance
+        -
+          uuid: 5c321fcccfff44a4bb1daa19cbd88f7a
+          name: 'FreeBSD: System contact details'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.4.0
+          key: system.contact
+          delay: 15m
+          history: 7d
+          trends: '0'
+          value_type: CHAR
+          description: |
+            MIB: SNMPv2-MIB
+            The textual identification of the contact person for this managed node, together with information on how to contact this person. If no contact information is known, the value is the zero-length string.
+          inventory_link: CONTACT
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            -
+              tag: component
+              value: system
+        -
+          uuid: 80918e13fde445999817b6aa389ec6cd
+          name: 'FreeBSD: Load average (1m avg)'
+          type: SNMP_AGENT
+          snmp_oid: '1.3.6.1.4.1.2021.10.1.3["index","1.3.6.1.4.1.2021.10.1.2", "Load-1"]'
+          key: system.cpu.load.avg1
+          history: 7d
+          value_type: FLOAT
+          description: |
+            MIB: UCD-SNMP-MIB
+            The 1 minute load averages.
+          tags:
+            -
+              tag: component
+              value: cpu
+        -
+          uuid: 042507c10ba64f18b246290ed596d14a
+          name: 'FreeBSD: Load average (5m avg)'
+          type: SNMP_AGENT
+          snmp_oid: '1.3.6.1.4.1.2021.10.1.3["index","1.3.6.1.4.1.2021.10.1.2", "Load-5"]'
+          key: system.cpu.load.avg5
+          history: 7d
+          value_type: FLOAT
+          description: |
+            MIB: UCD-SNMP-MIB
+            The 5 minutes load averages.
+          tags:
+            -
+              tag: component
+              value: cpu
+        -
+          uuid: c6a85a3c1fc84ce8864924ca57454cbb
+          name: 'FreeBSD: Load average (15m avg)'
+          type: SNMP_AGENT
+          snmp_oid: '1.3.6.1.4.1.2021.10.1.3["index","1.3.6.1.4.1.2021.10.1.2", "Load-15"]'
+          key: system.cpu.load.avg15
+          history: 7d
+          value_type: FLOAT
+          description: |
+            MIB: UCD-SNMP-MIB
+            The 15 minutes load averages.
+          tags:
+            -
+              tag: component
+              value: cpu
+        -
+          uuid: afef1ab1a11b46f2ae2a6978fc8595cf
+          name: 'FreeBSD: Number of CPUs'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#SNMPVALUE},1.3.6.1.2.1.25.3.3.1.1]'
+          key: system.cpu.num
+          history: 7d
+          description: |
+            MIB: HOST-RESOURCES-MIB
+            Count the number of CPU cores by counting number of cores discovered in hrProcessorTable using LLD.
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |
+                  //count the number of cores
+                  return JSON.parse(value).length;
+          tags:
+            -
+              tag: component
+              value: cpu
+        -
+          uuid: 5998b379c9ba4a90b8775a2cf1301e00
+          name: 'FreeBSD: System description'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.1.0
+          key: system.descr
+          delay: 15m
+          history: 7d
+          trends: '0'
+          value_type: CHAR
+          description: |
+            MIB: SNMPv2-MIB
+            System description of the host.
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            -
+              tag: component
+              value: system
+        -
+          uuid: bf84215328884ef7be407a387f8d2d44
+          name: 'FreeBSD: System location'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.6.0
+          key: system.location
+          delay: 15m
+          history: 7d
+          trends: '0'
+          value_type: CHAR
+          description: |
+            MIB: SNMPv2-MIB
+            The physical location of this node. If the location is unknown, the value is the zero-length string.
+          inventory_link: LOCATION
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            -
+              tag: component
+              value: system
+        -
+          uuid: 7e32bf99f3ea4492be5ce084725961ce
+          name: 'FreeBSD: System name'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.5.0
+          key: system.name
+          delay: 15m
+          history: 7d
+          trends: '0'
+          value_type: CHAR
+          description: |
+            MIB: SNMPv2-MIB
+            System host name.
+          inventory_link: NAME
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            -
+              tag: component
+              value: system
+          triggers:
+            -
+              uuid: e0a030da527f4418b46d2b8d37dd87fe
+              expression: 'last(/FreeBSD by SNMP/system.name,#1)<>last(/FreeBSD by SNMP/system.name,#2) and length(last(/FreeBSD by SNMP/system.name))>0'
+              name: 'FreeBSD: System name has changed'
+              event_name: 'FreeBSD: System name has changed (new name: {ITEM.VALUE})'
+              priority: INFO
+              description: 'System name has changed. Ack to close.'
+              manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: notice
+                -
+                  tag: scope
+                  value: security
+        -
+          uuid: 58175794382a4fdea9438185f0692701
+          name: 'FreeBSD: System object ID'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.1.2.0
+          key: system.objectid
+          delay: 15m
+          history: 7d
+          trends: '0'
+          value_type: CHAR
+          description: |
+            MIB: SNMPv2-MIB
+            The vendor authoritative identification of the network management subsystem contained in the entity. This value is allocated within the SMI enterprises subtree (1.3.6.1.4.1) and provides an easy and unambiguous means for determining what kind of box is being managed.
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            -
+              tag: component
+              value: system
+        -
+          uuid: fdac4f025e3e4e2b82cdc1bcac8f7ed7
+          name: 'FreeBSD: System software'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.25.6.3.1.2.1
+          key: system.software
+          delay: 1h
+          history: 7d
+          trends: '0'
+          value_type: CHAR
+          description: |
+            MIB: HOST-RESOURCES-V2-MIB
+            A textual description of this installed piece of
+            software, including the manufacturer, revision, the
+            name by which it is commonly known, and optionally,
+            its serial number.
+          inventory_link: SOFTWARE
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 6h
+          tags:
+            -
+              tag: component
+              value: system
+        -
+          uuid: bb9844bb017a4b3d93bef0020822f77a
+          name: 'FreeBSD: Uptime'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.2.1.25.1.1.0
+          key: system.uptime
+          delay: 30s
+          history: 7d
+          trends: 0d
+          units: uptime
+          description: |
+            MIB: SNMPv2-MIB
+            System uptime in 'N days, hh:mm:ss' format.
+          preprocessing:
+            -
+              type: MULTIPLIER
+              parameters:
+                - '0.01'
+          tags:
+            -
+              tag: component
+              value: system
+          triggers:
+            -
+              uuid: 985efdbb1ffe41798d558e25872c2b7f
+              expression: 'last(/FreeBSD by SNMP/system.uptime)<10m'
+              name: 'FreeBSD: has been restarted'
+              event_name: 'FreeBSD: has been restarted (uptime < 10m)'
+              priority: INFO
+              description: 'Uptime is less than 10 minutes.'
+              manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: notice
+        -
+          uuid: 1d2650e29ffb4bc584891a2c3addd588
+          name: 'FreeBSD: Available memory'
+          type: CALCULATED
+          key: vm.memory.available
+          history: 7d
+          units: B
+          params: last(//vm.memory.free)+last(//vm.memory.buffers)+last(//vm.memory.cached)
+          description: 'Please note that memory utilization is a rough estimate, since memory available is calculated as free+buffers+cached, which is not 100% accurate, but the best we can get using SNMP.'
+          tags:
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 9c9b48cc726c4b3b8459bf19cfae572b
+          name: 'FreeBSD: Memory (buffers)'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.4.14.0
+          key: vm.memory.buffers
+          history: 7d
+          units: B
+          description: |
+            MIB: UCD-SNMP-MIB
+            The total amount of real or virtual memory currently allocated for use as memory buffers.
+          preprocessing:
+            -
+              type: MULTIPLIER
+              parameters:
+                - '1024'
+          tags:
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 75e7185344294146b21d9d460e2ffa14
+          name: 'FreeBSD: Memory (cached)'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.4.15.0
+          key: vm.memory.cached
+          history: 7d
+          units: B
+          description: |
+            MIB: UCD-SNMP-MIB
+            The total amount of real or virtual memory currently allocated for use as cached memory.
+          preprocessing:
+            -
+              type: MULTIPLIER
+              parameters:
+                - '1024'
+          tags:
+            -
+              tag: component
+              value: memory
+        -
+          uuid: d23d9741fbf14d308067c5dc28ce74fc
+          name: 'FreeBSD: Free memory'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.4.6.0
+          key: vm.memory.free
+          history: 7d
+          units: B
+          description: |
+            MIB: UCD-SNMP-MIB
+            The amount of real/physical memory currently unused or available.
+          preprocessing:
+            -
+              type: MULTIPLIER
+              parameters:
+                - '1024'
+          tags:
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 94761f1546c3443994a364821d4fc65f
+          name: 'FreeBSD: Total memory'
+          type: SNMP_AGENT
+          snmp_oid: 1.3.6.1.4.1.2021.4.5.0
+          key: vm.memory.total
+          history: 7d
+          units: B
+          description: |
+            MIB: UCD-SNMP-MIB
+            Total memory in Bytes.
+          preprocessing:
+            -
+              type: MULTIPLIER
+              parameters:
+                - '1024'
+          tags:
+            -
+              tag: component
+              value: memory
+        -
+          uuid: 239a8ab1ac72466185877d22d377c398
+          name: 'FreeBSD: Memory utilization'
+          type: CALCULATED
+          key: vm.memory.util
+          history: 7d
+          value_type: FLOAT
+          units: '%'
+          params: '(last(//vm.memory.total)-(last(//vm.memory.free)+last(//vm.memory.buffers)+last(//vm.memory.cached)))/last(//vm.memory.total)*100'
+          description: 'Please note that memory utilization is a rough estimate, since memory available is calculated as free+buffers+cached, which is not 100% accurate, but the best we can get using SNMP.'
+          tags:
+            -
+              tag: component
+              value: memory
+          triggers:
+            -
+              uuid: dfc377c851de4a3eae307fc4106adb11
+              expression: 'min(/FreeBSD by SNMP/vm.memory.util,5m)>{$MEMORY.UTIL.MAX}'
+              name: 'FreeBSD: High memory utilization'
+              event_name: 'FreeBSD: High memory utilization (>{$MEMORY.UTIL.MAX}% for 5m)'
+              priority: AVERAGE
+              description: 'The system is running out of free memory.'
+              dependencies:
+                -
+                  name: 'FreeBSD: Lack of available memory'
+                  expression: 'min(/FreeBSD by SNMP/vm.memory.available,5m)<{$MEMORY.AVAILABLE.MIN} and last(/FreeBSD by SNMP/vm.memory.total)>0'
+              tags:
+                -
+                  tag: scope
+                  value: capacity
+                -
+                  tag: scope
+                  value: performance
+      discovery_rules:
+        -
+          uuid: 905a5c9077df4760940b6de98db845bf
+          name: 'CPU discovery'
+          type: DEPENDENT
+          key: cpu.discovery
+          delay: '0'
+          description: 'This discovery will create set of per core CPU metrics from UCD-SNMP-MIB, using {#CPU.COUNT} in preprocessing. That''s the only reason why LLD is used.'
+          item_prototypes:
+            -
+              uuid: d59ad61283bd4fdc98692dd67b513cd2
+              name: 'FreeBSD: CPU idle time'
+              type: SNMP_AGENT
+              snmp_oid: 1.3.6.1.4.1.2021.11.11.0
+              key: 'system.cpu.idle[{#SNMPINDEX}]'
+              history: 7d
+              value_type: FLOAT
+              units: '%'
+              description: |
+                MIB: UCD-SNMP-MIB
+                The time the CPU has spent doing nothing.
+              tags:
+                -
+                  tag: component
+                  value: cpu
+            -
+              uuid: 24ab361f4dbf487aadccd283343e43b9
+              name: 'FreeBSD: CPU interrupt time'
+              type: SNMP_AGENT
+              snmp_oid: 1.3.6.1.4.1.2021.11.56.0
+              key: 'system.cpu.interrupt[{#SNMPINDEX}]'
+              history: 7d
+              value_type: FLOAT
+              units: '%'
+              description: |
+                MIB: UCD-SNMP-MIB
+                The amount of time the CPU has been servicing hardware interrupts.
+              preprocessing:
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                -
+                  type: JAVASCRIPT
+                  parameters:
+                    - |
+                      //to get utilization in %, divide by N, where N is number of cores.
+                      return value/{#CPU.COUNT}
+              tags:
+                -
+                  tag: component
+                  value: cpu
+            -
+              uuid: 7f472918279f4113953175015f159774
+              name: 'FreeBSD: CPU iowait time'
+              type: SNMP_AGENT
+              snmp_oid: 1.3.6.1.4.1.2021.11.54.0
+              key: 'system.cpu.iowait[{#SNMPINDEX}]'
+              history: 7d
+              value_type: FLOAT
+              units: '%'
+              description: |
+                MIB: UCD-SNMP-MIB
+                Amount of time the CPU has been waiting for I/O to complete.
+              preprocessing:
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                -
+                  type: JAVASCRIPT
+                  parameters:
+                    - |
+                      //to get utilization in %, divide by N, where N is number of cores.
+                      return value/{#CPU.COUNT}
+              tags:
+                -
+                  tag: component
+                  value: cpu
+            -
+              uuid: 73ea90a27bb442949900b91d04519a2a
+              name: 'FreeBSD: CPU nice time'
+              type: SNMP_AGENT
+              snmp_oid: 1.3.6.1.4.1.2021.11.51.0
+              key: 'system.cpu.nice[{#SNMPINDEX}]'
+              history: 7d
+              value_type: FLOAT
+              units: '%'
+              description: |
+                MIB: UCD-SNMP-MIB
+                The time the CPU has spent running users' processes that have been niced.
+              preprocessing:
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                -
+                  type: JAVASCRIPT
+                  parameters:
+                    - |
+                      //to get utilization in %, divide by N, where N is number of cores.
+                      return value/{#CPU.COUNT}
+              tags:
+                -
+                  tag: component
+                  value: cpu
+            -
+              uuid: a232fbeacb164107a9acd51f2b097f94
+              name: 'FreeBSD: CPU system time'
+              type: SNMP_AGENT
+              snmp_oid: 1.3.6.1.4.1.2021.11.52.0
+              key: 'system.cpu.system[{#SNMPINDEX}]'
+              history: 7d
+              value_type: FLOAT
+              units: '%'
+              description: |
+                MIB: UCD-SNMP-MIB
+                The time the CPU has spent running the kernel and its processes.
+              preprocessing:
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                -
+                  type: JAVASCRIPT
+                  parameters:
+                    - |
+                      //to get utilization in %, divide by N, where N is number of cores.
+                      return value/{#CPU.COUNT}
+              tags:
+                -
+                  tag: component
+                  value: cpu
+            -
+              uuid: e054cecbcaaa4513b32194c90033ccf4
+              name: 'FreeBSD: CPU user time'
+              type: SNMP_AGENT
+              snmp_oid: 1.3.6.1.4.1.2021.11.50.0
+              key: 'system.cpu.user[{#SNMPINDEX}]'
+              history: 7d
+              value_type: FLOAT
+              units: '%'
+              description: |
+                MIB: UCD-SNMP-MIB
+                The time the CPU has spent running users' processes that are not niced.
+              preprocessing:
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+                -
+                  type: JAVASCRIPT
+                  parameters:
+                    - |
+                      //to get utilization in %, divide by N, where N is number of cores.
+                      return value/{#CPU.COUNT}
+              tags:
+                -
+                  tag: component
+                  value: cpu
+            -
+              uuid: eeac4dee76cc447a8608860561c82351
+              name: 'FreeBSD: CPU utilization'
+              type: DEPENDENT
+              key: 'system.cpu.util[{#SNMPINDEX}]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              units: '%'
+              description: 'CPU utilization in %.'
+              preprocessing:
+                -
+                  type: JAVASCRIPT
+                  parameters:
+                    - |
+                      //Calculate utilization
+                      return (100 - value)
+              master_item:
+                key: 'system.cpu.idle[{#SNMPINDEX}]'
+              tags:
+                -
+                  tag: component
+                  value: cpu
+              trigger_prototypes:
+                -
+                  uuid: 824ea8a2a7ff4b968c92fabedd7d3559
+                  expression: 'min(/FreeBSD by SNMP/system.cpu.util[{#SNMPINDEX}],5m)>{$CPU.UTIL.CRIT}'
+                  name: 'FreeBSD: High CPU utilization'
+                  event_name: 'FreeBSD: High CPU utilization (over {$CPU.UTIL.CRIT}% for 5m)'
+                  opdata: 'Current utilization: {ITEM.LASTVALUE1}'
+                  priority: WARNING
+                  description: 'CPU utilization is too high. The system might be slow to respond.'
+                  dependencies:
+                    -
+                      name: 'FreeBSD: Load average is too high'
+                      expression: |
+                        min(/FreeBSD by SNMP/system.cpu.load.avg1,5m)/last(/FreeBSD by SNMP/system.cpu.num)>{$LOAD_AVG_PER_CPU.MAX.WARN}
+                        and last(/FreeBSD by SNMP/system.cpu.load.avg5)>0
+                        and last(/FreeBSD by SNMP/system.cpu.load.avg15)>0
+                  tags:
+                    -
+                      tag: scope
+                      value: performance
+          graph_prototypes:
+            -
+              uuid: 85ebe1eb31d34d69a5348e39a2a7ad09
+              name: 'FreeBSD: CPU usage{#SINGLETON}'
+              type: STACKED
+              ymin_type_1: FIXED
+              ymax_type_1: FIXED
+              graph_items:
+                -
+                  color: 1A7C11
+                  item:
+                    host: 'FreeBSD by SNMP'
+                    key: 'system.cpu.system[{#SNMPINDEX}]'
+                -
+                  sortorder: '1'
+                  color: 2774A4
+                  item:
+                    host: 'FreeBSD by SNMP'
+                    key: 'system.cpu.user[{#SNMPINDEX}]'
+                -
+                  sortorder: '2'
+                  color: F63100
+                  item:
+                    host: 'FreeBSD by SNMP'
+                    key: 'system.cpu.nice[{#SNMPINDEX}]'
+                -
+                  sortorder: '3'
+                  color: A54F10
+                  item:
+                    host: 'FreeBSD by SNMP'
+                    key: 'system.cpu.iowait[{#SNMPINDEX}]'
+                -
+                  sortorder: '4'
+                  color: FC6EA3
+                  item:
+                    host: 'FreeBSD by SNMP'
+                    key: 'system.cpu.interrupt[{#SNMPINDEX}]'
+            -
+              uuid: 9da5254c762247669da9f22580d44ac5
+              name: 'FreeBSD: CPU utilization{#SINGLETON}'
+              ymin_type_1: FIXED
+              ymax_type_1: FIXED
+              graph_items:
+                -
+                  drawtype: GRADIENT_LINE
+                  color: 1A7C11
+                  item:
+                    host: 'FreeBSD by SNMP'
+                    key: 'system.cpu.util[{#SNMPINDEX}]'
+          master_item:
+            key: system.cpu.num
+          preprocessing:
+            -
+              type: JAVASCRIPT
+              parameters:
+                - |
+                  //count the number of CPU cores
+                  return JSON.stringify([{"{#CPU.COUNT}": value, "{#SNMPINDEX}": 0, "{#SINGLETON}":""}])
+        -
+          uuid: c5f7b0d660eb48abb9431859321d5d5a
+          name: 'Block devices discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#DEVNAME},1.3.6.1.4.1.2021.13.15.1.1.2]'
+          key: vfs.dev.discovery
+          delay: 1h
+          filter:
+            evaltype: AND
+            conditions:
+              -
+                macro: '{#DEVNAME}'
+                value: '{$VFS.DEV.DEVNAME.MATCHES}'
+                formulaid: A
+              -
+                macro: '{#DEVNAME}'
+                value: '{$VFS.DEV.DEVNAME.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: B
+          description: 'Block devices are discovered from UCD-DISKIO-MIB::diskIOTable (http://net-snmp.sourceforge.net/docs/mibs/ucdDiskIOMIB.html#diskIOTable).'
+          item_prototypes:
+            -
+              uuid: 29a13f47a71f4143af47bd4d152e214d
+              name: 'FreeBSD: [{#DEVNAME}]: Disk read rate'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2021.13.15.1.1.5.{#SNMPINDEX}'
+              key: 'vfs.dev.read.rate[{#SNMPINDEX}]'
+              history: 7d
+              value_type: FLOAT
+              units: '!r/s'
+              description: |
+                MIB: UCD-DISKIO-MIB
+                The number of read accesses from this device since boot.
+              preprocessing:
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              tags:
+                -
+                  tag: component
+                  value: storage
+                -
+                  tag: disk
+                  value: '{#DEVNAME}'
+            -
+              uuid: 8502400939b2440da31f85984eee0e14
+              name: 'FreeBSD: [{#DEVNAME}]: Disk utilization'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2021.13.15.1.1.9.{#SNMPINDEX}'
+              key: 'vfs.dev.util[{#SNMPINDEX}]'
+              history: 7d
+              value_type: FLOAT
+              units: '%'
+              description: |
+                MIB: UCD-DISKIO-MIB
+                The 1 minute average load of disk (%).
+              tags:
+                -
+                  tag: component
+                  value: storage
+                -
+                  tag: disk
+                  value: '{#DEVNAME}'
+            -
+              uuid: b8fad88b6e6c4689ad92faa628af4c55
+              name: 'FreeBSD: [{#DEVNAME}]: Disk write rate'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2021.13.15.1.1.6.{#SNMPINDEX}'
+              key: 'vfs.dev.write.rate[{#SNMPINDEX}]'
+              history: 7d
+              value_type: FLOAT
+              units: '!w/s'
+              description: |
+                MIB: UCD-DISKIO-MIB
+                The number of write accesses from this device since boot.
+              preprocessing:
+                -
+                  type: CHANGE_PER_SECOND
+                  parameters:
+                    - ''
+              tags:
+                -
+                  tag: component
+                  value: storage
+                -
+                  tag: disk
+                  value: '{#DEVNAME}'
+          graph_prototypes:
+            -
+              uuid: 9aecedf169fe4a80abb0ca4da2a3e8ae
+              name: 'FreeBSD: [{#DEVNAME}]: Disk read/write rates'
+              graph_items:
+                -
+                  color: 1A7C11
+                  item:
+                    host: 'FreeBSD by SNMP'
+                    key: 'vfs.dev.read.rate[{#SNMPINDEX}]'
+                -
+                  sortorder: '1'
+                  drawtype: GRADIENT_LINE
+                  color: 2774A4
+                  item:
+                    host: 'FreeBSD by SNMP'
+                    key: 'vfs.dev.write.rate[{#SNMPINDEX}]'
+        -
+          uuid: 85f220b467154ed194801f1b8789745c
+          name: 'Mounted filesystem discovery'
+          type: SNMP_AGENT
+          snmp_oid: 'discovery[{#FSNAME},.1.3.6.1.2.1.25.3.8.1.2,{#FSTYPE},.1.3.6.1.2.1.25.3.8.1.4]'
+          key: vfs.fs.discovery
+          delay: 1h
+          filter:
+            evaltype: AND
+            conditions:
+              -
+                macro: '{#FSTYPE}'
+                value: '{$VFS.FS.FSTYPE.MATCHES}'
+                formulaid: C
+              -
+                macro: '{#FSTYPE}'
+                value: '{$VFS.FS.FSTYPE.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: D
+              -
+                macro: '{#FSNAME}'
+                value: '{$VFS.FS.FSNAME.MATCHES}'
+                formulaid: A
+              -
+                macro: '{#FSNAME}'
+                value: '{$VFS.FS.FSNAME.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: B
+          description: 'HOST-RESOURCES-MIB::hrFS discovery with filter.'
+          item_prototypes:
+            -
+              uuid: 949d57fc81b84eb781f16cc9cd335707
+              name: 'FreeBSD: [{#FSNAME}]: Free inodes in %'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2021.9.1.10["index","1.3.6.1.4.1.2021.9.1.2","{#FSNAME}"]'
+              key: 'vfs.fs.inode.pfree[{#SNMPINDEX}]'
+              history: 7d
+              value_type: FLOAT
+              units: '%'
+              description: |
+                MIB: UCD-SNMP-MIB
+                If having problems collecting this item make sure access to UCD-SNMP-MIB is allowed.
+              preprocessing:
+                -
+                  type: JAVASCRIPT
+                  parameters:
+                    - 'return (100-value);'
+              tags:
+                -
+                  tag: component
+                  value: storage
+                -
+                  tag: filesystem
+                  value: '{#FSNAME}'
+              trigger_prototypes:
+                -
+                  uuid: 9e4dea6cec36431fae2da711956deab1
+                  expression: 'min(/FreeBSD by SNMP/vfs.fs.inode.pfree[{#SNMPINDEX}],5m)<{$VFS.FS.INODE.PFREE.MIN.CRIT:"{#FSNAME}"}'
+                  name: 'FreeBSD: [{#FSNAME}]: Running out of free inodes'
+                  event_name: 'FreeBSD: [{#FSNAME}]: Running out of free inodes (free < {$VFS.FS.INODE.PFREE.MIN.CRIT:"{#FSNAME}"}%)'
+                  opdata: 'Free inodes: {ITEM.LASTVALUE1}'
+                  priority: AVERAGE
+                  description: |
+                    It may become impossible to write to disk if there are no index nodes left.
+                    As symptoms, 'No space left on device' or 'Disk is full' errors may be seen even though free space is available.
+                  tags:
+                    -
+                      tag: scope
+                      value: capacity
+                -
+                  uuid: 1d2759ff59214de4af60117186ba0090
+                  expression: 'min(/FreeBSD by SNMP/vfs.fs.inode.pfree[{#SNMPINDEX}],5m)<{$VFS.FS.INODE.PFREE.MIN.WARN:"{#FSNAME}"}'
+                  name: 'FreeBSD: [{#FSNAME}]: Running out of free inodes'
+                  event_name: 'FreeBSD: [{#FSNAME}]: Running out of free inodes (free < {$VFS.FS.INODE.PFREE.MIN.WARN:"{#FSNAME}"}%)'
+                  opdata: 'Free inodes: {ITEM.LASTVALUE1}'
+                  priority: WARNING
+                  description: |
+                    It may become impossible to write to disk if there are no index nodes left.
+                    As symptoms, 'No space left on device' or 'Disk is full' errors may be seen even though free space is available.
+                  dependencies:
+                    -
+                      name: 'FreeBSD: [{#FSNAME}]: Running out of free inodes'
+                      expression: 'min(/FreeBSD by SNMP/vfs.fs.inode.pfree[{#SNMPINDEX}],5m)<{$VFS.FS.INODE.PFREE.MIN.CRIT:"{#FSNAME}"}'
+                  tags:
+                    -
+                      tag: scope
+                      value: capacity
+            -
+              uuid: fbfc554afc1a48969a70b79b8c73952a
+              name: 'FreeBSD: [{#FSNAME}]: Space utilization'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2021.9.1.9["index","1.3.6.1.4.1.2021.9.1.2","{#FSNAME}"]'
+              key: 'vfs.fs.pused[{#SNMPINDEX}]'
+              history: 7d
+              value_type: FLOAT
+              units: '%'
+              description: |
+                MIB: UCD-SNMP-MIB
+                If having problems collecting this item make sure access to UCD-SNMP-MIB is allowed.
+              tags:
+                -
+                  tag: component
+                  value: storage
+                -
+                  tag: filesystem
+                  value: '{#FSNAME}'
+            -
+              uuid: 0768b1bad26f4dd3909834765e68e03b
+              name: 'FreeBSD: [{#FSNAME}]: Total space'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2021.9.1.6["index","1.3.6.1.4.1.2021.9.1.2","{#FSNAME}"]'
+              key: 'vfs.fs.total[{#SNMPINDEX}]'
+              history: 7d
+              units: B
+              description: |
+                MIB: UCD-SNMP-MIB
+                If having problems collecting this item make sure access to UCD-SNMP-MIB is allowed.
+              preprocessing:
+                -
+                  type: MULTIPLIER
+                  parameters:
+                    - '1024'
+              tags:
+                -
+                  tag: component
+                  value: storage
+                -
+                  tag: filesystem
+                  value: '{#FSNAME}'
+            -
+              uuid: 6f2b108433cc4020a8972aaea3a5a8ca
+              name: 'FreeBSD: [{#FSNAME}]: Used space'
+              type: SNMP_AGENT
+              snmp_oid: '1.3.6.1.4.1.2021.9.1.8["index","1.3.6.1.4.1.2021.9.1.2","{#FSNAME}"]'
+              key: 'vfs.fs.used[{#SNMPINDEX}]'
+              history: 7d
+              units: B
+              description: |
+                MIB: UCD-SNMP-MIB
+                If having problems collecting this item make sure access to UCD-SNMP-MIB is allowed.
+              preprocessing:
+                -
+                  type: MULTIPLIER
+                  parameters:
+                    - '1024'
+              tags:
+                -
+                  tag: component
+                  value: storage
+                -
+                  tag: filesystem
+                  value: '{#FSNAME}'
+          trigger_prototypes:
+            -
+              uuid: fd66601dd10142db8d5198407db13209
+              expression: |
+                last(/FreeBSD by SNMP/vfs.fs.pused[{#SNMPINDEX}])>{$VFS.FS.PUSED.MAX.CRIT:"{#FSNAME}"} and
+                ((last(/FreeBSD by SNMP/vfs.fs.total[{#SNMPINDEX}])-last(/FreeBSD by SNMP/vfs.fs.used[{#SNMPINDEX}]))<{$VFS.FS.FREE.MIN.CRIT:"{#FSNAME}"} or timeleft(/FreeBSD by SNMP/vfs.fs.pused[{#SNMPINDEX}],1h,100)<1d)
+              name: 'FreeBSD: [{#FSNAME}]: Disk space is critically low'
+              event_name: 'FreeBSD: [{#FSNAME}]: Disk space is critically low (used > {$VFS.FS.PUSED.MAX.CRIT:"{#FSNAME}"}%)'
+              opdata: 'Space used: {ITEM.LASTVALUE3} of {ITEM.LASTVALUE2} ({ITEM.LASTVALUE1})'
+              priority: AVERAGE
+              description: |
+                Two conditions should match: First, space utilization should be above {$VFS.FS.PUSED.MAX.CRIT:"{#FSNAME}"}.
+                Second condition should be one of the following:
+                  - The disk free space is less than {$VFS.FS.FREE.MIN.CRIT:"{#FSNAME}"}.
+                  - The disk will be full in less than 24 hours.
+              manual_close: 'YES'
+              tags:
+                -
+                  tag: scope
+                  value: availability
+                -
+                  tag: scope
+                  value: capacity
+            -
+              uuid: e27e46c885fd4cc6993af7973af62e14
+              expression: |
+                last(/FreeBSD by SNMP/vfs.fs.pused[{#SNMPINDEX}])>{$VFS.FS.PUSED.MAX.WARN:"{#FSNAME}"} and
+                ((last(/FreeBSD by SNMP/vfs.fs.total[{#SNMPINDEX}])-last(/FreeBSD by SNMP/vfs.fs.used[{#SNMPINDEX}]))<{$VFS.FS.FREE.MIN.WARN:"{#FSNAME}"} or timeleft(/FreeBSD by SNMP/vfs.fs.pused[{#SNMPINDEX}],1h,100)<1d)
+              name: 'FreeBSD: [{#FSNAME}]: Disk space is low'
+              event_name: 'FreeBSD: [{#FSNAME}]: Disk space is low (used > {$VFS.FS.PUSED.MAX.WARN:"{#FSNAME}"}%)'
+              opdata: 'Space used: {ITEM.LASTVALUE3} of {ITEM.LASTVALUE2} ({ITEM.LASTVALUE1})'
+              priority: WARNING
+              description: |
+                Two conditions should match: First, space utilization should be above {$VFS.FS.PUSED.MAX.WARN:"{#FSNAME}"}.
+                Second condition should be one of the following:
+                  - The disk free space is less than {$VFS.FS.FREE.MIN.WARN:"{#FSNAME}"}.
+                  - The disk will be full in less than 24 hours.
+              manual_close: 'YES'
+              dependencies:
+                -
+                  name: 'FreeBSD: [{#FSNAME}]: Disk space is critically low'
+                  expression: |
+                    last(/FreeBSD by SNMP/vfs.fs.pused[{#SNMPINDEX}])>{$VFS.FS.PUSED.MAX.CRIT:"{#FSNAME}"} and
+                    ((last(/FreeBSD by SNMP/vfs.fs.total[{#SNMPINDEX}])-last(/FreeBSD by SNMP/vfs.fs.used[{#SNMPINDEX}]))<{$VFS.FS.FREE.MIN.CRIT:"{#FSNAME}"} or timeleft(/FreeBSD by SNMP/vfs.fs.pused[{#SNMPINDEX}],1h,100)<1d)
+              tags:
+                -
+                  tag: scope
+                  value: availability
+                -
+                  tag: scope
+                  value: capacity
+          graph_prototypes:
+            -
+              uuid: 382112490f6e44babb7a12f2ab4f0930
+              name: 'FreeBSD: [{#FSNAME}]: Disk space usage'
+              width: '600'
+              height: '340'
+              type: PIE
+              show_3d: 'YES'
+              graph_items:
+                -
+                  color: '969696'
+                  calc_fnc: LAST
+                  type: GRAPH_SUM
+                  item:
+                    host: 'FreeBSD by SNMP'
+                    key: 'vfs.fs.total[{#SNMPINDEX}]'
+                -
+                  sortorder: '1'
+                  color: C80000
+                  calc_fnc: LAST
+                  item:
+                    host: 'FreeBSD by SNMP'
+                    key: 'vfs.fs.used[{#SNMPINDEX}]'
+      tags:
+        -
+          tag: class
+          value: os
+        -
+          tag: target
+          value: freebsd
+      macros:
+        -
+          macro: '{$CPU.UTIL.CRIT}'
+          value: '90'
+          description: 'Threshold of CPU utilization for warning trigger in %.'
+        -
+          macro: '{$LOAD_AVG_PER_CPU.MAX.WARN}'
+          value: '1.5'
+          description: 'Load per CPU considered sustainable. Tune if needed.'
+        -
+          macro: '{$MEMORY.AVAILABLE.MIN}'
+          value: 20M
+          description: 'Threshold of available memory for trigger in bytes.'
+        -
+          macro: '{$MEMORY.UTIL.MAX}'
+          value: '90'
+          description: 'Threshold of memory utilization for trigger in %'
+        -
+          macro: '{$SNMP.TIMEOUT}'
+          value: 5m
+          description: 'The time interval for SNMP availability trigger.'
+        -
+          macro: '{$VFS.DEV.DEVNAME.MATCHES}'
+          value: .+
+          description: 'This macro is used in block devices discovery. Can be overridden on the host or linked template level'
+        -
+          macro: '{$VFS.DEV.DEVNAME.NOT_MATCHES}'
+          value: '^(loop[0-9]*|sd[a-z][0-9]+|nbd[0-9]+|sr[0-9]+|fd[0-9]+|dm-[0-9]+|ram[0-9]+|ploop[a-z0-9]+|md[0-9]*|hcp[0-9]*|cd[0-9]*|pass[0-9]*|zram[0-9]*)'
+          description: 'This macro is used in block devices discovery. Can be overridden on the host or linked template level'
+        -
+          macro: '{$VFS.FS.FREE.MIN.CRIT}'
+          value: 5G
+          description: 'The critical threshold of the filesystem utilization.'
+        -
+          macro: '{$VFS.FS.FREE.MIN.WARN}'
+          value: 10G
+          description: 'The warning threshold of the filesystem utilization.'
+        -
+          macro: '{$VFS.FS.FSNAME.MATCHES}'
+          value: .+
+          description: 'This macro is used in filesystems discovery. Can be overridden on the host or linked template level'
+        -
+          macro: '{$VFS.FS.FSNAME.NOT_MATCHES}'
+          value: ^(/dev|/sys|/run|/var/run|/proc|.+/shm$)
+          description: 'This macro is used in filesystems discovery. Can be overridden on the host or linked template level'
+        -
+          macro: '{$VFS.FS.FSTYPE.MATCHES}'
+          value: '.*(9.3|hrFSBerkeleyFFS)$'
+          description: 'This macro is used in filesystems discovery. Can be overridden on the host or linked template level'
+        -
+          macro: '{$VFS.FS.FSTYPE.NOT_MATCHES}'
+          value: ^\s$
+          description: 'This macro is used in filesystems discovery. Can be overridden on the host or linked template level'
+        -
+          macro: '{$VFS.FS.INODE.PFREE.MIN.CRIT}'
+          value: '10'
+          description: 'Threshold of inodes usage for average severity trigger in %. Can be used with filesystem name as context.'
+        -
+          macro: '{$VFS.FS.INODE.PFREE.MIN.WARN}'
+          value: '20'
+          description: 'Threshold of inodes usage for warning trigger in %. Can be used with filesystem name as context.'
+        -
+          macro: '{$VFS.FS.PUSED.MAX.CRIT}'
+          value: '90'
+          description: 'Threshold of filesystem used space for average severity trigger in %. Can be used with filesystem name as context.'
+        -
+          macro: '{$VFS.FS.PUSED.MAX.WARN}'
+          value: '80'
+          description: 'Threshold of used filesystem space for warning trigger in %. Can be used with filesystem name as context.'
+      valuemaps:
+        -
+          uuid: 8a32e24eebb944f0a081a4a2a5783723
+          name: 'Service state'
+          mappings:
+            -
+              value: '0'
+              newvalue: Down
+            -
+              value: '1'
+              newvalue: Up
+        -
+          uuid: 72668aa3e8b6484bbe784165be17062b
+          name: 'SNMPv2-TC::TruthValue'
+          mappings:
+            -
+              value: '1'
+              newvalue: 'true'
+            -
+              value: '2'
+              newvalue: 'false'
+        -
+          uuid: 1738e54cd93d4cd0b5cf23e87aa0fb7d
+          name: zabbix.host.available
+          mappings:
+            -
+              value: '0'
+              newvalue: 'not available'
+            -
+              value: '1'
+              newvalue: available
+            -
+              value: '2'
+              newvalue: unknown
+  triggers:
+    -
+      uuid: 747b66fd987a44309d07e13147c9192b
+      expression: 'min(/FreeBSD by SNMP/vm.memory.available,5m)<{$MEMORY.AVAILABLE.MIN} and last(/FreeBSD by SNMP/vm.memory.total)>0'
+      name: 'FreeBSD: Lack of available memory'
+      event_name: 'FreeBSD: Lack of available memory (<{$MEMORY.AVAILABLE.MIN} of {ITEM.VALUE2})'
+      opdata: 'Available: {ITEM.LASTVALUE1}, total: {ITEM.LASTVALUE2}'
+      priority: AVERAGE
+      description: 'The system is running out of memory.'
+      tags:
+        -
+          tag: scope
+          value: capacity
+        -
+          tag: scope
+          value: performance
+    -
+      uuid: 9817537f85854e99bd31c92eb955ea7e
+      expression: |
+        min(/FreeBSD by SNMP/system.cpu.load.avg1,5m)/last(/FreeBSD by SNMP/system.cpu.num)>{$LOAD_AVG_PER_CPU.MAX.WARN}
+        and last(/FreeBSD by SNMP/system.cpu.load.avg5)>0
+        and last(/FreeBSD by SNMP/system.cpu.load.avg15)>0
+      name: 'FreeBSD: Load average is too high'
+      event_name: 'FreeBSD: Load average is too high (per CPU load over {$LOAD_AVG_PER_CPU.MAX.WARN} for 5m)'
+      opdata: 'Load averages(1m 5m 15m): ({ITEM.LASTVALUE1} {ITEM.LASTVALUE3} {ITEM.LASTVALUE4}), # of CPUs: {ITEM.LASTVALUE2}'
+      priority: AVERAGE
+      description: 'Per CPU load average is too high. Your system may be slow to respond.'
+      tags:
+        -
+          tag: scope
+          value: performance
+  graphs:
+    -
+      uuid: ec4a84f6b2da42b2ba00eb7e0d2d2639
+      name: 'FreeBSD: Memory usage'
+      ymin_type_1: FIXED
+      graph_items:
+        -
+          drawtype: BOLD_LINE
+          color: 1A7C11
+          item:
+            host: 'FreeBSD by SNMP'
+            key: vm.memory.total
+        -
+          sortorder: '1'
+          drawtype: GRADIENT_LINE
+          color: 2774A4
+          item:
+            host: 'FreeBSD by SNMP'
+            key: vm.memory.available
+    -
+      uuid: ab5e2f48fab04d79b9c4149338f9e3f7
+      name: 'FreeBSD: Memory utilization'
+      ymin_type_1: FIXED
+      ymax_type_1: FIXED
+      graph_items:
+        -
+          drawtype: GRADIENT_LINE
+          color: 1A7C11
+          item:
+            host: 'FreeBSD by SNMP'
+            key: vm.memory.util
+    -
+      uuid: c32976dcae1b47b9a92b3ded33260503
+      name: 'FreeBSD: System load'
+      ymin_type_1: FIXED
+      graph_items:
+        -
+          color: 1A7C11
+          item:
+            host: 'FreeBSD by SNMP'
+            key: system.cpu.load.avg1
+        -
+          sortorder: '1'
+          color: 2774A4
+          item:
+            host: 'FreeBSD by SNMP'
+            key: system.cpu.load.avg5
+        -
+          sortorder: '2'
+          color: F63100
+          item:
+            host: 'FreeBSD by SNMP'
+            key: system.cpu.load.avg15
+        -
+          sortorder: '3'
+          color: A54F10
+          yaxisside: RIGHT
+          item:
+            host: 'FreeBSD by SNMP'
+            key: system.cpu.num
