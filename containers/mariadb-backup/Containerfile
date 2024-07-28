@@ -1,0 +1,89 @@
+### Dockerfile notes 
+# - The software will create items, therefore needs writable permanent storage under DATA_DIR, 
+
+
+FROM docker.io/library/alpine:3.20
+
+# OCI Annotations from https://github.com/opencontainers/image-spec/blob/master/annotations.md
+
+LABEL \
+org.opencontainers.image.url="TBD"  \
+org.opencontainers.image.title="MariaDB backup"          \
+org.opencontainers.image.description="Don't forget to mount persistent storage to DATA_DIR, otherwise you will loose data! In order to prevent it, the container refuses to start if it suspects that DATA_DIR is not provided with external persistent storage."
+
+
+# ARG is gone after build
+# ENV will be in the image
+
+ENV TZ="Europe/Brussels"
+ENV DATA_DIR="/mnt/mariadb-backups"
+ENV INSTALL_DIR="/root/scripts"
+
+ENV M_CNF_FILE="${INSTALL_DIR}/backup.my.cnf"
+
+ENV MARIADB_HOSTNAME="localhost"
+ENV MARIADB_PORT="3306"
+ENV MARIADB_USERNAME="root"
+ENV MARIADB_PASSWORD="dummy"
+
+ENV BACKUP_RETENTION_DAYS="30"
+
+ARG RUNTIME_PKGS=" \
+            tzdata \
+            tini \
+            bash \
+            nano \
+            mariadb-client \
+            "
+
+ARG BUILD_PKGS=" \
+             \
+            "
+
+# Build and cleanup needs to stay in the same RUN
+# otherwise cleanup will run in a separate layer and wont reduce the image size
+RUN set -eux && \
+    apk update &&\
+    apk add \
+        --no-cache \
+        --clean-protected \
+        ${RUNTIME_PKGS} && \
+    echo "Installing build dependencies" && \
+    apk add \
+        --no-cache \
+        --clean-protected \
+        ${BUILD_PKGS} && \
+    mkdir -p "${INSTALL_DIR}" && \
+    mkdir -p "${DATA_DIR}" && \
+    touch "${DATA_DIR}/NO_PERMANENT_STORAGE" && \
+    mkdir -p "/etc/periodic/20min" && \
+    echo '*/20    *       *       *       *       run-parts /etc/periodic/20min' >> /etc/crontabs/root && \
+    ln -s "${INSTALL_DIR}/db-dump.sh" "/etc/periodic/20min/db-dump.sh" && \
+    ln -s "${INSTALL_DIR}/db-maintain.sh" "/etc/periodic/daily/db-maintain.sh" && \
+    echo "Container build RUN success" && \
+    apk del \
+            --no-cache \
+            --clean-protected \
+        ${BUILD_PKGS} && \
+    rm -rf /var/cache/apk/* && \
+    rm -rf /root/.cache && \
+    echo "Container build cleanup success"
+
+COPY backup.my.cnf.example "${INSTALL_DIR}/backup.my.cnf.example"
+COPY db-dump.sh "${INSTALL_DIR}/db-dump.sh"
+COPY db-maintain.sh "${INSTALL_DIR}/db-maintain.sh"
+
+COPY entrypoint.sh /entrypoint.sh
+
+
+VOLUME [ "${DATA_DIR}" ]
+
+# CMD can be overridden in "docker run", ENTRYPOINT can't be
+
+# Also if you specify both, in normal format it wont work, 
+# in array format CMD definition will become argument after ENTRYPOINT
+ENTRYPOINT ["/sbin/tini", "--", "/entrypoint.sh"]
+
+
+    
+ 

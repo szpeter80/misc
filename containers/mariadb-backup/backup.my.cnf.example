@@ -1,0 +1,4 @@
+# https://mariadb.com/kb/en/configuring-mariadb-with-option-files/
+# Permissions advised: chmod 0600 ./backup.my.cnf
+
+[client]
