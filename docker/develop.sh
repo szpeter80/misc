@@ -53,18 +53,14 @@ if [[ $# -eq 1  && "$1" == "image-prune-all" ]]; then
     echo -e "\n\nCleaning up ALL unused images";
     yes | podman image prune --all
 
-    echo -e "\n\nDocker images:\n"
+    echo -e "\n\Container images:\n"
     podman images
-    echo -e "\n\nDocker containers:\n"
+    echo -e "\n\nContainers:\n"
     podman ps -a
 
     exit 0
 fi;
 
-echo "$TAG" 
-echo "$TAG_LATEST"
-
-exit 1
 podman build . --tag "$TAG" --tag "$TAG_LATEST" | tee > last_build.log
 
 

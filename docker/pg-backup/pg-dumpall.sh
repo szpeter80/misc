@@ -9,7 +9,7 @@ echo -e "\n$(date "+%Y-%m-%d %H:%M:%S") Starting database maintenance ...";
 echo "$(date "+%Y-%m-%d %H:%M:%S") Vacuuming ...";
 vacuumdb ${CRED_ARGS} --all --full --quiet --analyze
 
-DUMP_FN=${DATA_DIR}/$(${CMD_DATETIME_FN})-globals.sql.txt
+DUMP_FN=${DATA_DIR}/$(${CMD_DATETIME_FN})-globals-sql.txt
 echo "$(date "+%Y-%m-%d %H:%M:%S") Dumping global objects to ${DUMP_FN} ...";
 pg_dumpall ${CRED_ARGS} --clean --if-exists --globals-only > ${DUMP_FN}
 
