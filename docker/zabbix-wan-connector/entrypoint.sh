@@ -68,7 +68,7 @@ X_CFG="${DATA_DIR}/zabbix-proxy/zabbix-proxy.cfg"
     echo "Server=${ZBX_SERVER_HOST}"
 
     # For passive mode proxies, these are ignored
-    echo "ConfigFrequency=${ZBX_CONFIGFREQUENCY}"
+    echo "ProxyConfigFrequency=${ZBX_PROXYCONFIGFREQUENCY}"
     echo "DataSenderFrequency=${ZBX_DATASENDERFREQUENCY}"
 
     # Location of ssh keys used to execute the checks

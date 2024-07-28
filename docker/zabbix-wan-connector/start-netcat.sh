@@ -1,4 +1,7 @@
 #!/bin/bash
+# For manual debugging, not integrated with the container / build env
+
+
 NC_CMD="nc -v -l -k -p ${2}"
 
 case "$1" in

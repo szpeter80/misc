@@ -1,7 +1,7 @@
-### Dockerfile notes 
+### Containerfile notes 
 
 
-FROM docker.io/library/ubuntu:22.04
+FROM docker.io/library/ubuntu:24.04
 
 # OCI Annotations from https://github.com/opencontainers/image-spec/blob/master/annotations.md
 
@@ -24,15 +24,15 @@ ENV ZBX_PROXYMODE="0"
 ENV ZBX_SERVER_HOST="dummy-zabbix.lan"
 ENV ZBX_TIMEOUT=10
 ENV ZBX_DEBUGLEVEL=3
-ENV ZBX_CONFIGFREQUENCY=3600
+ENV ZBX_PROXYCONFIGFREQUENCY=3600
 ENV ZBX_DATASENDERFREQUENCY=1
 ENV ZBX_ENABLEREMOTECOMMANDS=1
 ENV ZBX_LOGREMOTECOMMANDS=1
 ENV ZBX_STATSALLOWEDIP="127.0.0.1,::1,dummy-zabbix.lan"
-ENV X_ZBX_SOURCEIP="Set ZBX_SOURCEIP to a value if you neet to specify the outgoing address"
+ENV X_ZBX_SOURCEIP="Set ZBX_SOURCEIP to a value if you need to specify the outgoing address"
 
-ARG X_ZABBIX_REPO_URL="https://repo.zabbix.com/zabbix/6.2/ubuntu/pool/main/z/zabbix-release"
-ARG X_ZABBIX_REPO_PKG="zabbix-release_6.2-4+ubuntu22.04_all.deb"
+ARG X_ZABBIX_REPO_URL="https://repo.zabbix.com/zabbix/7.0/ubuntu/pool/main/z/zabbix-release"
+ARG X_ZABBIX_REPO_PKG="zabbix-release_7.0-2+ubuntu24.04_all.deb"
 
 ARG RUNTIME_PKGS=" \
             tzdata \
@@ -41,6 +41,7 @@ ARG RUNTIME_PKGS=" \
             openssh-client \
             openvpn \
             fping \
+            iproute2 \
             "
 
 ARG BUILD_PKGS=" \
@@ -55,38 +56,39 @@ RUN set -eux && \
     echo 'tzdata tzdata/Areas select Europe' >> /debconf-preseed.txt && \
     echo 'tzdata tzdata/Zones/Europe select Brussels' >> /debconf-preseed.txt && \
     debconf-set-selections /debconf-preseed.txt && \
-    echo "Docker install packages" && \
+    echo "Installing packages..." && \
     apt update &&\
-    yes | apt install \
+    apt install -y \
         ${RUNTIME_PKGS} \
         ${BUILD_PKGS} && \
     wget "${X_ZABBIX_REPO_URL}/${X_ZABBIX_REPO_PKG}" && \
     dpkg -i ${X_ZABBIX_REPO_PKG} && \
     apt update &&\
-    yes | apt install  zabbix-proxy-sqlite3 zabbix-sql-scripts && \
+    apt install -y  zabbix-proxy-sqlite3 zabbix-sql-scripts && \
     mkdir -p "${INSTALL_DIR}" && \
     mkdir -p "${DATA_DIR}" && \
     touch "${DATA_DIR}/NO_PERMANENT_STORAGE" && \
-    echo "Docker remove build-only dependencies" && \
-    yes | apt remove \
-            --purge \
+    echo "Removing build-only dependencies..." && \
+    apt remove \
+        -y \
+        --purge \
         ${BUILD_PKGS} && \
     rm -rf /var/cache/apt/* && \
     rm -rf /root/.cache && \
     rm ${X_ZABBIX_REPO_PKG} && \
     rm /debconf-preseed.txt  && \
-    echo "Docker cleanup success, finishing build..."
+    echo "Cleanup done, finishing build..."
 
 COPY start-connection.sh "${INSTALL_DIR}/start-connection.sh"
 COPY start-netcat.sh     "${INSTALL_DIR}/start-netcat.sh"
 
-COPY docker-entrypoint.sh /docker-entrypoint.sh
+COPY entrypoint.sh /entrypoint.sh
 
 
 VOLUME [ "${DATA_DIR}" ]
 
-# CMD can be overridden in "docker run", ENTRYPOINT can't be
+# CMD can be overridden in "podman run", ENTRYPOINT can't be
 
 # Also if you specify both, in normal format it wont work, 
 # in array format CMD definition will become argument after ENTRYPOINT
-ENTRYPOINT ["/usr/bin/tini", "--", "/docker-entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/entrypoint.sh"]
