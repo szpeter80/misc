@@ -1,8 +1,5 @@
 ### Dockerfile notes 
-# - The software will create items, therefore needs writable permanent storage under INSTALL_DIR, even with remote database backend
-# - Default configuration is changed in the source to omit host specifier where the webserver binds.
-#   "localhost" was too restrictive in a Docker container. If you need to change this, you can do it in the config file "mvo.cfg"
-# - If you find "file not found" runtime errors, probably some files are missing from the install step 
+# - The software will create items, therefore needs writable permanent storage under DATA_DIR
 
 FROM docker.io/library/alpine:3.20
 
