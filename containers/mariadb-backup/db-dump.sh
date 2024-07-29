@@ -20,8 +20,10 @@ do
     DUMP_FILE_TIMESTAMP=$(${CMD_DATETIME_FN})
     mysqldump -c \
         --defaults-file=${M_CNF_FILE} \
+        --host=${MARIADB_HOSTNAME} \
+        --port=${MARIADB_PORT} \
+        --user=${MARIADB_USERNAME} \
         --default-character-set=utf8 \
-        -u root \
         --add-locks \
         --events \
         --add-drop-database \
@@ -31,4 +33,3 @@ do
 done;
 
 echo -e "$(date "+%Y-%m-%d %H:%M:%S") dumping finished\n";
-
