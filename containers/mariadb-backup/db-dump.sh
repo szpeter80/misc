@@ -23,7 +23,7 @@ do
         --host=${MARIADB_HOSTNAME} \
         --port=${MARIADB_PORT} \
         --user=${MARIADB_USERNAME} \
-        -c
+        --complete-insert \
         --default-character-set=utf8 \
         --add-locks \
         --events \
