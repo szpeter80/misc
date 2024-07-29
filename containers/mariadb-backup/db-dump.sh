@@ -8,7 +8,7 @@ find ${DATA_DIR} -type f -mtime +${BACKUP_RETENTION_DAYS} -iname '*-sql.txt*' -e
 echo -e "\n$(date "+%Y-%m-%d %H:%M:%S") Starting database dump...";
 echo -e "\tBackup directory: ${DATA_DIR}\n";
 
-for DB in $(mysql --defaults-file=${M_CNF_FILE} -uroot -e 'show databases' -s --skip-column-names);
+for DB in $(mariadb --defaults-file=${M_CNF_FILE} --host=${MARIADB_HOSTNAME} --port=${MARIADB_PORT} --user=${MARIADB_USERNAME} -e 'show databases' -s --skip-column-names);
 do
     [ "$DB" == "information_schema" ] && continue;
     [ "$DB" == "performance_schema" ] && continue;
@@ -18,11 +18,12 @@ do
 
     echo -e "\t$(date "+%Y-%m-%d %H:%M:%S") Database: ${DB}"
     DUMP_FILE_TIMESTAMP=$(${CMD_DATETIME_FN})
-    mysqldump -c \
+    mariadb-dump \
         --defaults-file=${M_CNF_FILE} \
         --host=${MARIADB_HOSTNAME} \
         --port=${MARIADB_PORT} \
         --user=${MARIADB_USERNAME} \
+        -c
         --default-character-set=utf8 \
         --add-locks \
         --events \
