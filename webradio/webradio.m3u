@@ -1,0 +1,47 @@
+#EXTM3U
+
+#EXTINF:0,ROCK ANTENNE Hauptstation
+http://mp3channels.webradio.antenne.de/rockantenne
+#EXTINF:0,ROCK ANTENNE Classic Perlen
+http://mp3channels.webradio.antenne.de/classic-perlen
+#EXTINF:0,ROCK ANTENNE Soft Rock
+http://mp3channels.webradio.antenne.de/soft-rock
+
+#EXTINF:0,JAZZ RADIO: Funk (FR)
+https://jazz-wr06.ice.infomaniak.ch/jazz-wr06-128.mp3
+
+#EXTINF:0,JAZZ RADIO: Electro swing (FR)
+https://jazz-wr04.ice.infomaniak.ch/jazz-wr04-128.mp3
+
+#EXTINF:0,90.9 Jazzy Rádió
+https://jazzy.hu/jazzy.mp3
+#EXTINF:0,Jazzy Groove
+https://jazzy.hu/jazzygroove.mp3
+#EXTINF:0,Jazzy Soul
+https://jazzy.hu/jazzysoul.mp3
+
+#EXTINF:0, Rocker Radio (HU)
+http://stream.diazol.hu:35200/stream
+
+#EXTINF:0, Sláger FM 95.8
+https://slagerfm.netregator.hu:7813/slagerfm128.mp3
+# https://slagerfm.netregator.hu:7813/slagerfm256.mp3
+# https://slagerfm.netregator.hu:7813/slagerfm320.mp3
+
+#EXTINF:0, Retro Rádió
+https://icast.connectmedia.hu/5001/live.mp3
+
+#EXTINF:0,MR2 Petofi Radio
+http://mr-stream.mediaconnect.hu/4738/mr2.mp3
+#EXTINF:0,MR1 Kossuth Radio
+http://mr-stream.mediaconnect.hu/4736/mr1.mp3
+#EXTINF:0,Poptarisznya.hu
+http://adas.poptarisznya.hu:8200/mobil.mp3
+#EXTINF:0,FM95 Best FM Debrecen
+http://stream1.webthings.hu:8000/fm95-x-128.mp3
+#EXTINF:0,Radio88 Szeged FM 95.4
+http://stream.radio88.hu:8000/;stream
+#EXTINF:0,Radio88 Szeged FM 95.4 RETRO88
+http://stream1.radio88.hu:8300/;stream
+#EXTINF:0,Radio88 Szeged FM 95.4 CLUB88
+http://stream2.radio88.hu:8400/;stream

@@ -1,0 +1,4 @@
+#EXTM3U
+
+#EXTINF:0,Webradio playlist
+https://raw.githubusercontent.com/szpeter80/webradio/main/webradio.m3u
