@@ -1,0 +1,129 @@
+zabbix_export:
+  version: '7.0'
+  template_groups:
+    - uuid: 7df96b18c230490a9a0a9e2307226338
+      name: Templates
+  templates:
+    - uuid: 15b7ca8e81f74de78a81e33ca98026d3
+      template: virustotal_api_domain
+      name: 'Virustotal API - Domain'
+      description: |
+        A template to get data and process from Virustotal database by API.
+        Contains the domain and reputation API processing
+      groups:
+        - name: Templates
+      items:
+        - uuid: 06ab0bccc3254a9a8481bc9678497061
+          name: 'Get domainreport data'
+          type: HTTP_AGENT
+          key: vt_api.v3.domainreport
+          delay: 1h
+          value_type: TEXT
+          trends: '0'
+          description: 'Get the data from the domain report API'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.data
+          url: 'https://www.virustotal.com/api/v3/domains/{$VIRUSTOTAL_DOMAIN}'
+          headers:
+            - name: accept
+              value: application/json
+            - name: x-apikey
+              value: '{$VIRUSTOTAL_APIKEY}'
+        - uuid: 3b9e183479644df59032202ea13c291b
+          name: 'Number of tests with result "harmless"'
+          type: DEPENDENT
+          key: vt_api.v3.domainreport.stats.harmless
+          delay: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.attributes.last_analysis_stats.harmless
+          master_item:
+            key: vt_api.v3.domainreport
+        - uuid: 3d759206b6114bc1baceccebb8119d7a
+          name: 'Number of tests with result "malicious"'
+          type: DEPENDENT
+          key: vt_api.v3.domainreport.stats.malicious
+          delay: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.attributes.last_analysis_stats.malicious
+          master_item:
+            key: vt_api.v3.domainreport
+        - uuid: 3c759485a1c441bcabe1ee20a7c9e529
+          name: 'Number of tests with result "suspicious"'
+          type: DEPENDENT
+          key: vt_api.v3.domainreport.stats.suspicious
+          delay: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.attributes.last_analysis_stats.suspicious
+          master_item:
+            key: vt_api.v3.domainreport
+        - uuid: 96ca8cb54d264e8fbbf050de2c5f802d
+          name: 'Number of tests with result "undetected"'
+          type: DEPENDENT
+          key: vt_api.v3.domainreport.stats.undetected
+          delay: '0'
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.attributes.last_analysis_stats.undetected
+          master_item:
+            key: vt_api.v3.domainreport
+        - uuid: c3802bc231214a519882a72541fc78f1
+          name: 'Test result summary'
+          type: DEPENDENT
+          key: vt_api.v3.domainreport.stats_txt
+          delay: '0'
+          value_type: TEXT
+          trends: '0'
+          preprocessing:
+            - type: JAVASCRIPT
+              parameters:
+                - |
+                  // ES5 syntax, Duktape does not support later
+                  value = JSON.parse(value);
+                  
+                  var blacklisted = [];
+                  var blacklisted_txt;
+                  
+                  Object
+                  .keys(value.attributes.last_analysis_results)
+                  .forEach( 
+                      function(engine) {
+                          var data = value.attributes.last_analysis_results[engine];
+                          if (data.result !== 'clean' && data.result !== 'unrated') {
+                              blacklisted.push( engine + ':' + data.result );
+                          }
+                      }
+                  );
+                  
+                  if (blacklisted.length > 0) {
+                      blacklisted_txt = 'The alerting blacklist(s) are: ' + blacklisted.join(', ');
+                  } else {
+                      blacklisted_txt = 'No blacklist has alerts.';
+                  }
+                  
+                  return 'The domain reputation analysis of "' + value.id + '" has checks with '
+                      + value.attributes.last_analysis_stats.malicious + ' malicious, '
+                      + value.attributes.last_analysis_stats.suspicious + ' suspicious, '
+                      + value.attributes.last_analysis_stats.harmless + ' harmless, '
+                      + value.attributes.last_analysis_stats.undetected + ' undetected  '
+                      + ' results, and '
+                      + value.attributes.last_analysis_stats.timeout + ' checks timeouted. '
+                      + blacklisted_txt
+                  ;
+                  
+          master_item:
+            key: vt_api.v3.domainreport
+      macros:
+        - macro: '{$VIRUSTOTAL_APIKEY}'
+          type: SECRET_TEXT
+          description: 'Your own API key for Virustotal'
+        - macro: '{$VIRUSTOTAL_DOMAIN}'
+          description: 'Domains: the domain name to check'
