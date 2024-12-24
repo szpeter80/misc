@@ -1,13 +1,10 @@
 zabbix_export:
-  version: '6.2'
-  date: '2022-12-11T15:34:40Z'
+  version: '7.2'
   template_groups:
-    -
-      uuid: 36bff6c29af64692839d077febfc7079
+    - uuid: 36bff6c29af64692839d077febfc7079
       name: 'Templates/Network devices'
   templates:
-    -
-      uuid: e9718b8491694afb95719f88310c5bb8
+    - uuid: e9718b8491694afb95719f88310c5bb8
       template: 'Check OpenWRT by SSH'
       name: 'Check OpenWRT by SSH'
       description: |
@@ -21,30 +18,22 @@ zabbix_export:
         
         Beware, Dropbear might not support newer key types than RSA
       templates:
-        -
-          name: 'Check OpenWRT network by SSH'
-        -
-          name: 'Check OpenWRT resources by SSH'
-        -
-          name: 'Check OpenWRT upgrades by SSH'
+        - name: 'Check OpenWRT network by SSH'
+        - name: 'Check OpenWRT resources by SSH'
+        - name: 'Check OpenWRT upgrades by SSH'
       groups:
-        -
-          name: 'Templates/Network devices'
+        - name: 'Templates/Network devices'
       macros:
-        -
-          macro: '{$SSH_KEYFILE_PRIV}'
+        - macro: '{$SSH_KEYFILE_PRIV}'
           value: 'macro not supported yet in ssh key file data'
           description: 'SSH key, private part'
-        -
-          macro: '{$SSH_KEYFILE_PUB}'
+        - macro: '{$SSH_KEYFILE_PUB}'
           value: 'macro not supported yet in ssh key file data'
           description: 'SSH key, public part'
-        -
-          macro: '{$SSH_PORT}'
+        - macro: '{$SSH_PORT}'
           value: '22'
           description: 'Port to connect by SSH'
-    -
-      uuid: d6218f29fc444f978b43ac5070f810f8
+    - uuid: d6218f29fc444f978b43ac5070f810f8
       template: 'Check OpenWRT network by SSH'
       name: 'Check OpenWRT network by SSH'
       description: |
@@ -58,132 +47,105 @@ zabbix_export:
         
         Beware, Dropbear might not support newer key types than RSA
       groups:
-        -
-          name: 'Templates/Network devices'
+        - name: 'Templates/Network devices'
       items:
-        -
-          uuid: 865eaa8b806d4d97982226117ec09e78
+        - uuid: 865eaa8b806d4d97982226117ec09e78
           name: 'WAN: interface HW address'
           type: DEPENDENT
           key: openwrt_get_data.if.wan.hwaddr
-          delay: '0'
-          trends: '0'
+          history: 90d
           value_type: TEXT
           description: 'Hardware address of WAN interface'
           inventory_link: MACADDRESS_A
           preprocessing:
-            -
-              type: JSONPATH
+            - type: JSONPATH
               parameters:
                 - $.wan.if_hwaddr
-            -
-              type: DISCARD_UNCHANGED_HEARTBEAT
+            - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
                 - 6h
           master_item:
             key: 'ssh.run[openwrt_get_data_network,{HOST.CONN},{$SSH_PORT}]'
-        -
-          uuid: 4198bd6da716416bbdd8cc1e8fb4fd54
+        - uuid: 4198bd6da716416bbdd8cc1e8fb4fd54
           name: 'WAN: interface name'
           type: DEPENDENT
           key: openwrt_get_data.if.wan.name
-          delay: '0'
-          trends: '0'
+          history: 90d
           value_type: TEXT
           description: 'Name of WAN interface'
           preprocessing:
-            -
-              type: JSONPATH
+            - type: JSONPATH
               parameters:
                 - $.wan.if_name
-            -
-              type: DISCARD_UNCHANGED_HEARTBEAT
+            - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
                 - 6h
           master_item:
             key: 'ssh.run[openwrt_get_data_network,{HOST.CONN},{$SSH_PORT}]'
-        -
-          uuid: 69886b73783c4d1cabe8de6a47e74527
+        - uuid: 69886b73783c4d1cabe8de6a47e74527
           name: 'WAN: interface incoming traffic'
           type: DEPENDENT
           key: openwrt_get_data.if.wan.rx_bps
-          delay: '0'
+          history: 90d
           units: bps
           description: 'Incoming traffic in bit/sec'
           preprocessing:
-            -
-              type: JSONPATH
+            - type: JSONPATH
               parameters:
                 - $.wan.if_rx_bytes
-            -
-              type: MULTIPLIER
+            - type: MULTIPLIER
               parameters:
                 - '8'
-            -
-              type: CHANGE_PER_SECOND
-              parameters:
-                - ''
+            - type: CHANGE_PER_SECOND
           master_item:
             key: 'ssh.run[openwrt_get_data_network,{HOST.CONN},{$SSH_PORT}]'
-        -
-          uuid: 9c59e1714d494883bbe319616cffe859
+        - uuid: 9c59e1714d494883bbe319616cffe859
           name: 'WAN: interface receiving errors'
           type: DEPENDENT
           key: openwrt_get_data.if.wan.rx_errors
-          delay: '0'
+          history: 90d
           description: 'Incoming broken traffic'
           preprocessing:
-            -
-              type: JSONPATH
+            - type: JSONPATH
               parameters:
                 - $.wan.if_rx_errors
           master_item:
             key: 'ssh.run[openwrt_get_data_network,{HOST.CONN},{$SSH_PORT}]'
-        -
-          uuid: 0a75e61a82864ec785801bce7dbf5113
+        - uuid: 0a75e61a82864ec785801bce7dbf5113
           name: 'WAN: interface outgoing traffic'
           type: DEPENDENT
           key: openwrt_get_data.if.wan.tx_bps
-          delay: '0'
+          history: 90d
           units: bps
           description: 'Outgoing traffic in bit/second'
           preprocessing:
-            -
-              type: JSONPATH
+            - type: JSONPATH
               parameters:
                 - $.wan.if_tx_bytes
-            -
-              type: MULTIPLIER
+            - type: MULTIPLIER
               parameters:
                 - '8'
-            -
-              type: CHANGE_PER_SECOND
-              parameters:
-                - ''
+            - type: CHANGE_PER_SECOND
           master_item:
             key: 'ssh.run[openwrt_get_data_network,{HOST.CONN},{$SSH_PORT}]'
-        -
-          uuid: 7bcbaf22c44443398d722f664ab32a96
+        - uuid: 7bcbaf22c44443398d722f664ab32a96
           name: 'WAN: interface sending errors'
           type: DEPENDENT
           key: openwrt_get_data.if.wan.tx_errors
-          delay: '0'
+          history: 90d
           description: 'Outgoing broken traffic'
           preprocessing:
-            -
-              type: JSONPATH
+            - type: JSONPATH
               parameters:
                 - $.wan.if_tx_errors
           master_item:
             key: 'ssh.run[openwrt_get_data_network,{HOST.CONN},{$SSH_PORT}]'
-        -
-          uuid: fec91a3350e049f391e58413958a2f71
+        - uuid: fec91a3350e049f391e58413958a2f71
           name: 'Get network data'
           type: SSH
           key: 'ssh.run[openwrt_get_data_network,{HOST.CONN},{$SSH_PORT}]'
           delay: 3m
           history: 45d
-          trends: '0'
           value_type: TEXT
           params: |
             #!/bin/sh
@@ -225,20 +187,16 @@ zabbix_export:
           privatekey: id_rsa
           description: 'Main network data gather check item'
       macros:
-        -
-          macro: '{$SSH_KEYFILE_PRIV}'
+        - macro: '{$SSH_KEYFILE_PRIV}'
           value: 'macro not supported yet in ssh key file data'
           description: 'SSH key, private part'
-        -
-          macro: '{$SSH_KEYFILE_PUB}'
+        - macro: '{$SSH_KEYFILE_PUB}'
           value: 'macro not supported yet in ssh key file data'
           description: 'SSH key, public part'
-        -
-          macro: '{$SSH_PORT}'
+        - macro: '{$SSH_PORT}'
           value: '22'
           description: 'Port to connect by SSH'
-    -
-      uuid: f6df186ff52d4477aabf709c5826767c
+    - uuid: f6df186ff52d4477aabf709c5826767c
       template: 'Check OpenWRT resources by SSH'
       name: 'Check OpenWRT resources by SSH'
       description: |
@@ -252,116 +210,112 @@ zabbix_export:
         
         Beware, Dropbear might not support newer key types than RSA
       groups:
-        -
-          name: 'Templates/Network devices'
+        - name: 'Templates/Network devices'
       items:
-        -
-          uuid: c1e7ea5e335048b3b77d0410d55cb841
+        - uuid: 45c3ae09d87e44b886c8a26620ff9646
           name: 'Host: hardware model'
           type: DEPENDENT
           key: openwrt_get_data.host.hw_model
-          delay: '0'
-          trends: '0'
+          history: 90d
           value_type: TEXT
           description: 'Hardware model'
-          inventory_link: TYPE
           preprocessing:
-            -
-              type: JSONPATH
+            - type: JSONPATH
               parameters:
                 - $.host.hw_model
-            -
-              type: DISCARD_UNCHANGED_HEARTBEAT
+            - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
                 - 12h
           master_item:
             key: 'ssh.run[openwrt_get_data_resources,{HOST.CONN},{$SSH_PORT}]'
-        -
-          uuid: e32e3d36cde341f4ab1b65f2f830fe4a
+        - uuid: c1e7ea5e335048b3b77d0410d55cb841
+          name: 'Host: hardware type'
+          type: DEPENDENT
+          key: openwrt_get_data.host.hw_type
+          history: 90d
+          value_type: TEXT
+          description: 'Hardware type'
+          inventory_link: TYPE
+          preprocessing:
+            - type: JSONPATH
+              parameters:
+                - $.host.hw_model
+            - type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 12h
+          master_item:
+            key: 'ssh.run[openwrt_get_data_resources,{HOST.CONN},{$SSH_PORT}]'
+        - uuid: e32e3d36cde341f4ab1b65f2f830fe4a
           name: 'Host: name'
           type: DEPENDENT
           key: openwrt_get_data.host.name
-          delay: '0'
-          trends: '0'
+          history: 90d
           value_type: TEXT
           description: Hostname
           inventory_link: NAME
           preprocessing:
-            -
-              type: JSONPATH
+            - type: JSONPATH
               parameters:
                 - $.host.name
-            -
-              type: TRIM
+            - type: TRIM
               parameters:
                 - ' '
-            -
-              type: DISCARD_UNCHANGED_HEARTBEAT
+            - type: DISCARD_UNCHANGED_HEARTBEAT
               parameters:
                 - 12h
           master_item:
             key: 'ssh.run[openwrt_get_data_resources,{HOST.CONN},{$SSH_PORT}]'
-        -
-          uuid: b186211e06964981be9bb18a18acfeeb
+        - uuid: b186211e06964981be9bb18a18acfeeb
           name: 'Host: uptime'
           type: DEPENDENT
           key: openwrt_get_data.host.uptime_sec
-          delay: '0'
+          history: 90d
           units: s
           description: 'Host uptime in seconds'
           preprocessing:
-            -
-              type: JSONPATH
+            - type: JSONPATH
               parameters:
                 - $.host.uptime_sec
           master_item:
             key: 'ssh.run[openwrt_get_data_resources,{HOST.CONN},{$SSH_PORT}]'
-        -
-          uuid: c42bd5c0ef9a4dce9e6b1156da50b98a
+        - uuid: c42bd5c0ef9a4dce9e6b1156da50b98a
           name: 'Memory: Available'
           type: DEPENDENT
           key: openwrt_get_data.mem.available
-          delay: '0'
+          history: 90d
           units: b
           description: 'Estimation of how much memory is available for starting new applications (see "man free").'
           preprocessing:
-            -
-              type: JSONPATH
+            - type: JSONPATH
               parameters:
                 - $.mem.available
-            -
-              type: MULTIPLIER
+            - type: MULTIPLIER
               parameters:
                 - '1024'
           master_item:
             key: 'ssh.run[openwrt_get_data_resources,{HOST.CONN},{$SSH_PORT}]'
-        -
-          uuid: a3f71a03e07a44ec9352c34521b37de1
+        - uuid: a3f71a03e07a44ec9352c34521b37de1
           name: 'Memory: Total'
           type: DEPENDENT
           key: openwrt_get_data.mem.total
-          delay: '0'
+          history: 90d
           units: b
           description: 'Total installed memory'
           preprocessing:
-            -
-              type: JSONPATH
+            - type: JSONPATH
               parameters:
                 - $.mem.total
-            -
-              type: MULTIPLIER
+            - type: MULTIPLIER
               parameters:
                 - '1024'
           master_item:
             key: 'ssh.run[openwrt_get_data_resources,{HOST.CONN},{$SSH_PORT}]'
-        -
-          uuid: a6548a7443b44129a823c8b9add0a5ba
+        - uuid: a6548a7443b44129a823c8b9add0a5ba
           name: 'Get resource data'
           type: SSH
           key: 'ssh.run[openwrt_get_data_resources,{HOST.CONN},{$SSH_PORT}]'
           delay: 20m
           history: 45d
-          trends: '0'
           value_type: TEXT
           params: |
             #!/bin/sh
@@ -404,20 +358,16 @@ zabbix_export:
           privatekey: id_rsa
           description: 'Main resource data gather check item'
       macros:
-        -
-          macro: '{$SSH_KEYFILE_PRIV}'
+        - macro: '{$SSH_KEYFILE_PRIV}'
           value: 'macro not supported yet in ssh key file data'
           description: 'SSH key, private part'
-        -
-          macro: '{$SSH_KEYFILE_PUB}'
+        - macro: '{$SSH_KEYFILE_PUB}'
           value: 'macro not supported yet in ssh key file data'
           description: 'SSH key, public part'
-        -
-          macro: '{$SSH_PORT}'
+        - macro: '{$SSH_PORT}'
           value: '22'
           description: 'Port to connect by SSH'
-    -
-      uuid: 596cd3cf5be1485dbb4b02a8471970e2
+    - uuid: 596cd3cf5be1485dbb4b02a8471970e2
       template: 'Check OpenWRT upgrades by SSH'
       name: 'Check OpenWRT upgrades by SSH'
       description: |
@@ -431,80 +381,66 @@ zabbix_export:
         
         Beware, Dropbear might not support newer key types than RSA
       groups:
-        -
-          name: 'Templates/Network devices'
+        - name: 'Templates/Network devices'
       items:
-        -
-          uuid: 925dfd5f9bff46a3ad6335406e47f05e
+        - uuid: 925dfd5f9bff46a3ad6335406e47f05e
           name: 'Upgrades: Available package count'
           type: DEPENDENT
           key: openwrt_get_data.upgrade.package_count
-          delay: '0'
+          history: 90d
           description: 'Number of packages, which can be upgraded'
           preprocessing:
-            -
-              type: JSONPATH
+            - type: JSONPATH
               parameters:
                 - $.upgrade.packages.package_count
           master_item:
             key: 'ssh.run[openwrt_get_data_upgrades,{HOST.CONN},{$SSH_PORT}]'
-        -
-          uuid: 596ee8e048c042ca9fb9fd14b9cbc6f3
+        - uuid: 596ee8e048c042ca9fb9fd14b9cbc6f3
           name: 'Upgrades: Available package list'
           type: DEPENDENT
           key: openwrt_get_data.upgrade.package_list
-          delay: '0'
-          trends: '0'
+          history: 90d
           value_type: TEXT
           description: 'Text list of packages, which can be upgraded'
           preprocessing:
-            -
-              type: JSONPATH
+            - type: JSONPATH
               parameters:
                 - $.upgrade.packages.package_list
           master_item:
             key: 'ssh.run[openwrt_get_data_upgrades,{HOST.CONN},{$SSH_PORT}]'
-        -
-          uuid: c8e6ffa13bb945978fa6fcd0b93593b9
+        - uuid: c8e6ffa13bb945978fa6fcd0b93593b9
           name: 'Upgrades: Available release version'
           type: DEPENDENT
           key: openwrt_get_data.upgrade.release.available
-          delay: '0'
-          trends: '0'
+          history: 90d
           value_type: TEXT
           description: 'Text list of upgrade'
           preprocessing:
-            -
-              type: JSONPATH
+            - type: JSONPATH
               parameters:
                 - $.upgrade.release.available
           master_item:
             key: 'ssh.run[openwrt_get_data_upgrades,{HOST.CONN},{$SSH_PORT}]'
-        -
-          uuid: d5474dcddbaf4e04bc030ef17b9007cd
+        - uuid: d5474dcddbaf4e04bc030ef17b9007cd
           name: 'Upgrades: Current release version'
           type: DEPENDENT
           key: openwrt_get_data.upgrade.release.current
-          delay: '0'
-          trends: '0'
+          history: 90d
           value_type: TEXT
           description: 'Current release version running'
           inventory_link: OS
           preprocessing:
-            -
-              type: JSONPATH
+            - type: JSONPATH
               parameters:
                 - $.upgrade.release.current
           master_item:
             key: 'ssh.run[openwrt_get_data_upgrades,{HOST.CONN},{$SSH_PORT}]'
-        -
-          uuid: 8aa33d84d01d444cb529d5032a169453
+        - uuid: 8aa33d84d01d444cb529d5032a169453
           name: 'Get upgrade data'
           type: SSH
           key: 'ssh.run[openwrt_get_data_upgrades,{HOST.CONN},{$SSH_PORT}]'
           delay: 8h
           history: 45d
-          trends: '0'
           value_type: TEXT
           params: |
             #!/bin/sh
@@ -555,41 +491,41 @@ zabbix_export:
           publickey: id_rsa.pub
           privatekey: id_rsa
           description: 'Main upgrade data gather check item'
+          timeout: 30s
       macros:
-        -
-          macro: '{$SSH_KEYFILE_PRIV}'
+        - macro: '{$SSH_KEYFILE_PRIV}'
           value: 'macro not supported yet in ssh key file data'
           description: 'SSH key, private part'
-        -
-          macro: '{$SSH_KEYFILE_PUB}'
+        - macro: '{$SSH_KEYFILE_PUB}'
           value: 'macro not supported yet in ssh key file data'
           description: 'SSH key, public part'
-        -
-          macro: '{$SSH_PORT}'
+        - macro: '{$SSH_PORT}'
           value: '22'
           description: 'Port to connect by SSH'
   triggers:
-    -
-      uuid: d6fdf345557a41c5aa92d47870151d83
+    - uuid: d6fdf345557a41c5aa92d47870151d83
       expression: 'last(/Check OpenWRT by SSH/openwrt_get_data.host.uptime_sec)<1h'
       name: 'Device has been restarted'
       opdata: 'uptime is {ITEM.LASTVALUE1}'
       priority: WARNING
       description: 'Device has rebooted, uptime is low'
       manual_close: 'YES'
-    -
-      uuid: 89d17b19e0cb47dab8068b448503ce48
+    - uuid: 89d17b19e0cb47dab8068b448503ce48
       expression: 'last(/Check OpenWRT upgrades by SSH/openwrt_get_data.upgrade.release.current)<> last(/Check OpenWRT upgrades by SSH/openwrt_get_data.upgrade.release.available,#1) and length(last(/Check OpenWRT upgrades by SSH/openwrt_get_data.upgrade.release.available,#1))<>0'
       name: 'Image update needed'
       opdata: 'running {ITEM.LASTVALUE1}, available {ITEM.LASTVALUE2}'
       priority: WARNING
       description: 'System image can be updated on the monitored OpenWRT host'
       manual_close: 'YES'
-    -
-      uuid: 4f3ba17732af41d69cac7297a60da46d
+    - uuid: 4f3ba17732af41d69cac7297a60da46d
       expression: 'last(/Check OpenWRT upgrades by SSH/openwrt_get_data.upgrade.package_count,#1)<>0 or last(/Check OpenWRT upgrades by SSH/openwrt_get_data.upgrade.package_list)<>""'
-      name: 'Package update needed'
+      name: 'Package update available'
       opdata: '{ITEM.LASTVALUE1} packages: {ITEM.LASTVALUE2}'
-      priority: WARNING
-      description: 'Packages can be updated on the monitored OpenWRT host'
+      status: DISABLED
+      priority: INFO
+      description: |
+        Packages available on the monitored OpenWRT host.
+        
+        It is generally not recommended to upgrade individial packages on their own:
+        https://openwrt.org/meta/infobox/upgrade_packages_warning
       manual_close: 'YES'
