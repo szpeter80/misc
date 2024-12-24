@@ -31,8 +31,9 @@ ENV ZBX_LOGREMOTECOMMANDS=1
 ENV ZBX_STATSALLOWEDIP="127.0.0.1,::1,dummy-zabbix.lan"
 ENV X_ZBX_SOURCEIP="Set ZBX_SOURCEIP to a value if you need to specify the outgoing address"
 
-ARG X_ZABBIX_REPO_URL="https://repo.zabbix.com/zabbix/7.0/ubuntu/pool/main/z/zabbix-release"
-ARG X_ZABBIX_REPO_PKG="zabbix-release_7.0-2+ubuntu24.04_all.deb"
+# Source: https://www.zabbix.com/download?zabbix=7.2&os_distribution=ubuntu&os_version=24.04&components=proxy&db=sqlite3&ws=
+ARG X_ZABBIX_REPO_URL="https://repo.zabbix.com/zabbix/7.2/release/ubuntu/pool/main/z/zabbix-release/"
+ARG X_ZABBIX_REPO_PKG="zabbix-release_latest_7.2+ubuntu24.04_all.deb"
 
 ARG RUNTIME_PKGS=" \
             tzdata \
