@@ -1,3 +1,7 @@
+# OpenSSL frequently used commands - Quick Reference
+
+---
+
 **Generate KEY for cert**
 
 ```openssl genrsa -out server.key 2048```

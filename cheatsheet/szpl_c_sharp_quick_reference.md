@@ -1,4 +1,4 @@
-# C# Cheat Sheet / Quick Reference
+# C# Quick Reference
 
 ---
 
