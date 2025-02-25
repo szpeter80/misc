@@ -1,5 +1,23 @@
-Rootless Podman
-===============
+# Podman Quick Reference
+
+This is for Podman 5 on RHEL (Rocky / Alma / Oracle) 9
+
+---
+## 01 | Podman commands
+
+- **podman network inspect podman**  
+Inspect the default network.
+By default there is no name resolution on the default network.
+
+- **podman port my-container**  
+Show exposed ports for the given container
+
+- **podman port --all**  
+Show exposed ports for all containers
+
+
+---
+## xx | Rootless Podman
 
 Original sources:  
 <https://www.it-hure.de/2024/02/podman-compose-and-systemd/>  
