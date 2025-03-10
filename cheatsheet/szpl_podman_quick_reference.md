@@ -15,6 +15,11 @@ Show exposed ports for the given container
 - **podman port --all**  
 Show exposed ports for all containers
 
+- **podman cp ./testfile.dat mighty_container:/tmp**  
+Copy a local file to a running container.
+Can be reversed to copy from container to local.
+Can be used to copy from container - to - container too.
+
 
 ---
 ## xx | Rootless Podman
