@@ -20,6 +20,8 @@ Copy a local file to a running container.
 Can be reversed to copy from container to local.
 Can be used to copy from container - to - container too.
 
+- **podman image tree fooimg:latest**  
+Show image layers
 
 ---
 ## xx | Rootless Podman
