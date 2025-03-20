@@ -33,6 +33,9 @@ Execute ```ps``` inside the container, showing host-side and in-container user/g
 Migrate exsiting container to a new version of Podman.
 Also when UID/GID mapping is defined, this is the command which will execute the change.
 
+- **podman unshare cmd**  
+Runs cmd on the host in a new user namespace. This enables cmd to inspect its environment as a process in a new container.
+Common example: check permissions.
 
 
 ---
