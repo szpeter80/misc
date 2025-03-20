@@ -51,18 +51,20 @@ In order to enable user and group mapping for rootless containers ,
 the `/etc/subgid` and `/etc/subgid` files must exists:
 
 ```
-cat /etc/subuid 
-johndoe:100000:65536
-
-cat /etc/subgid
-johndoe:100000:65536
+sudo touch /etc/{subuid,subgid}
 ```
 
 Then you have to generate the sub-ids by running:
-`sudo usermod --add-subuids 100000-165535 --add-subgids 100000-165535 johndoe`
+
+```
+sudo usermod --add-subuids 100000-165535 --add-subgids 100000-165535 johndoe
+```
 
 After this, apply the changes:
-`podman system migrate`
+
+```
+podman system migrate
+```
 
 By default, non-root rules are very strict. You can relax some with sysctl's:
 
