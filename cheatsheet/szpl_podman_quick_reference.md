@@ -23,14 +23,46 @@ Can be used to copy from container - to - container too.
 - **podman image tree fooimg:latest**  
 Show image layers
 
+- **podman image tree fooimg:latest**  
+Show image layers
+
+- **podman top foo-container ```hgroup huser group uid user capeff rss pid state time args```**  
+Execute ```ps``` inside the container, showing host-side and in-container user/group mapping
+
+- **podman system migrate**  
+Migrate exsiting container to a new version of Podman.
+Also when UID/GID mapping is defined, this is the command which will execute the change.
+
+
+
 ---
-## xx | Rootless Podman
+## 02 | Rootless Podman
 
 Original sources:  
 <https://www.it-hure.de/2024/02/podman-compose-and-systemd/>  
 <https://www.christiansaga.de/howto/2024/04/17/switching-from-docker-to-podman.html>  
 <https://github.com/containers/podman/blob/main/docs/tutorials/rootless_tutorial.md>  
 <https://news.ycombinator.com/item?id=38982805>  
+
+User ID-s inside the container will be mapped, UID 0 will be mapped to the user started the container,
+UID>0 will be mapped to a range (in the example UID 1 -> 100 0000)
+
+In order to enable user and group mapping for rootless containers , 
+the `/etc/subgid` and `/etc/subgid` files must exists:
+
+```
+cat /etc/subuid 
+johndoe:100000:65536
+
+cat /etc/subgid
+johndoe:100000:65536
+```
+
+Then you have to generate the sub-ids by running:
+`sudo usermod --add-subuids 100000-165535 --add-subgids 100000-165535 johndoe`
+
+After this, apply the changes:
+`podman system migrate`
 
 By default, non-root rules are very strict. You can relax some with sysctl's:
 
