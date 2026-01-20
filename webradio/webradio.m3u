@@ -7,6 +7,9 @@ http://mp3channels.webradio.antenne.de/classic-perlen
 #EXTINF:0,ROCK ANTENNE Soft Rock
 http://mp3channels.webradio.antenne.de/soft-rock
 
+#EXTINF:0,Rock FM (ES)
+https://rockfm-cope-rrcast.flumotion.com/cope/rockfm.mp3
+
 #EXTINF:0,JAZZ RADIO: Funk (FR)
 https://jazz-wr06.ice.infomaniak.ch/jazz-wr06-128.mp3
 
