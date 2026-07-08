@@ -14,75 +14,75 @@ Notable differences:
 ---
 ## 01 | Debugging
 
-- **oc debug -t deployment/todo-http --image registry.access.redhat.com/ubi9/ubi:9.4**  
+- **`oc debug -t deployment/todo-http --image registry.access.redhat.com/ubi10/ubi:10.2`**  
 Start a debug container in an existing Pod. Container is destroyed after logout.
 
-- **oc debug -t deployment/todo-http --image registry.access.redhat.com/rhel7/rhel-tools**  
+- **`oc debug -t deployment/todo-http --image registry.access.redhat.com/rhel7/rhel-tools`**  
 An old image, with tools like ping and dig. The successor would be ```registry.redhat.io/rhel9/support-tools:9.4-6``` but that's behind authenticated repo.
 
-- **oc debug node/master01 -- chroot /host crictl images | egrep '^IMAGE|httpd|nginx'**  
+- **`oc debug node/master01 -- chroot /host crictl images | egrep '^IMAGE|httpd|nginx'`**  
 Start a debug container, chroot to /host, use `crictl` to list all downloaded images and filter for header, httpd and nginx related lines
 
-- **oc rsh -n openshift-monitoring alertmanager-main-0 amtool alert query --alertmanager.url http://localhost:9093**
+- **`oc rsh -n openshift-monitoring alertmanager-main-0 amtool alert query --alertmanager.url http://localhost:9093`**  
 Get Alerts from the CLI
 
-- **oc adm must-gather --image=registry.redhat.io/odf4/odf-must-gather-rhel9:v4.21 -- /usr/bin/gather --odf .**
+- **`oc adm must-gather --image=registry.redhat.io/odf4/odf-must-gather-rhel9:v4.21 -- /usr/bin/gather --odf .`**  
 Collects support request infopack, with ODF specific information
 
-- **odf noobaa bucket status -n my-namespace my-s3-bucket**
+- **`odf noobaa bucket status -n my-namespace my-s3-bucket`**  
 Gets bucket status from Noobaa
 
-- **oc patch storageclusters.ocs.openshift.io ocs-storagecluster -n openshift-storage --type json --patch '[{ "op": "replace", "path": "/spec/enableCephTools", "value": true }]'**
+- **`oc patch storageclusters.ocs.openshift.io ocs-storagecluster -n openshift-storage --type json --patch '[{ "op": "replace", "path": "/spec/enableCephTools", "value": true }]'`**  
 Enable Ceph Tools in ODF
 
-- **oc rsh my-cronjob mycommand**  
+- **`oc rsh my-cronjob mycommand`**  
 Attempt to start a shell session in a pod for the specified resource.
 Not all container images have a working shell
 It works with pods, deployment configs, deployments, jobs, daemon sets, replication controllers and replica sets.
 Any of the aforementioned resources (apart from pods) will be resolved to a ready pod.
 It will default to the first container if none is specified, and will attempt to use `/bin/sh` as the default shell.
 
-- **oc exec no-ca-bundle -- openssl s_client -connect server.network-svccerts.svc:443**  
+- **`oc exec no-ca-bundle -- openssl s_client -connect server.network-svccerts.svc:443`**  
 Execute a command directly (no shell etc) inside a container
 
-- **oc get pod -o=custom-columns=NODE:.spec.nodeName,POD:.metadata.name --sort-by '{.spec.nodeName}'**  
+- **`oc get pod -o=custom-columns=NODE:.spec.nodeName,POD:.metadata.name --sort-by '{.spec.nodeName}'`**  
 Print a list of pods and the node name they are running
 
-- **oc adm top node**  
+- **`oc adm top node`**  
 Display the resource usage of nodes
 
-- **oc describe node/master01**  
+- **`oc describe node/master01`**  
 Node details in human readable format
 
-- **oc get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.taints}{"\n"}{end}'**
+- **`oc get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.taints}{"\n"}{end}'`**
 List taints on all nodes
 
-- **oc get event --sort-by .metadata.creationTimestamp**  
+- **`oc get event --sort-by .metadata.creationTimestamp`**  
 Get Events in the current namespace (-A for all Events)
 
-- **oc get network cluster -o jsonpath='{.spec}' | jq**  
+- **`oc get network cluster -o jsonpath='{.spec}' | jq`**  
 Get the CNI type and the subnets used for Pod network and Service network
 
-- **for node in $(oc get nodes -o jsonpath="{.items[*].metadata.name}"); do oc debug node/${node} -- chroot /host poweroff 1; done**  
+- **`for node in $(oc get nodes -o jsonpath="{.items[*].metadata.name}"); do oc debug node/${node} -- chroot /host poweroff 1; done`**  
 Gracefully shut down all nodes.  Larger clusters needs more time, e.g. 10 minutes instead of 1.
 
-- **for node in $(oc get nodes -o jsonpath="{.items[*].metadata.name}"); do oc debug node/${node} -- chroot /host reboot; done**  
-Reboot the cluster (reboot all nodes).
-DANGER: on single-master clusters (SNO), the reboot command might not terminate in time !
+- **`for node in $(oc get nodes -o jsonpath="{.items[*].metadata.name}"); do oc debug node/${node} -- chroot /host reboot; done`**  
+Reboot the cluster (reboot all nodes).  
+DANGER: on single-master clusters (SNO), the reboot command might not terminate in time !  
 This means, the debug pod gets created, the Entrypoint set to the part after '--', and the pod is ungracefully terminated.  
 After node reboot, it will try to start all pods which were previously running ... including the debug pod with the reboot command.  
 This immediately reboots the node, effectively putting it to an endless reboot loop. Breaking the loop requires to interrupt the bootloader,
 add the 'single' kernel parameter, boot to a rescue shell, disable kubectl service, fully boot the node, remount /usr to rw where 'reboot'
 resides, move the binary or symlink out of path, start kubelet service and delete debug pods and namespaces manually, then undo all previous changes to the OS.
 
-- **kubectl api-resources --verbs=list --namespaced -o name | xargs -n 1 kubectl get --show-kind --ignore-not-found -n <namespace>**  
+- **`kubectl api-resources --verbs=list --namespaced -o name | xargs -n 1 kubectl get --show-kind --ignore-not-found -n <namespace>`**  
 Get ALL manifest in a namespace.
 
-- **kubectl get mutatingwebhookconfigurations | validatingwebhookconfigurations -o yaml**  
+- **`kubectl get mutatingwebhookconfigurations | validatingwebhookconfigurations -o yaml`**  
 Get the object, pipe it to YAML file, delete -- then you can remove finalizers from manifest and force-delete them.  
 It is possible to restore the webhook configuration from the YAML files, making it a temporary disable.
 
-- **kubectl get replicaset -o jsonpath='{ .items[?(@.spec.replicas==0)]}' -A | kubectl delete -f -**  
+- **`kubectl get replicaset -o jsonpath='{ .items[?(@.spec.replicas==0)]}' -A | kubectl delete -f -`**  
 Delete old ReplicaSet objects which has 0 wanted replicas, without changing the Deployment's .spec.revisionHistoryLimit.  
 Old ReplicaSets are kept in order to enable a rollback to a previous state 
 
