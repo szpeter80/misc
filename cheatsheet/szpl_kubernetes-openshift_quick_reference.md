@@ -54,7 +54,7 @@ Display the resource usage of nodes
 - **`oc describe node/master01`**  
 Node details in human readable format
 
-- **`oc get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.taints}{"\n"}{end}'`**
+- **`oc get nodes -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.taints}{"\n"}{end}'`**  
 List taints on all nodes
 
 - **`oc get event --sort-by .metadata.creationTimestamp`**  
@@ -63,8 +63,8 @@ Get Events in the current namespace (-A for all Events)
 - **`oc get network cluster -o jsonpath='{.spec}' | jq`**  
 Get the CNI type and the subnets used for Pod network and Service network
 
-- **`for node in $(oc get nodes -o jsonpath="{.items[*].metadata.name}"); do oc debug node/${node} -- chroot /host poweroff 1; done`**  
-Gracefully shut down all nodes.  Larger clusters needs more time, e.g. 10 minutes instead of 1.
+- **`for node in $(oc get nodes -o jsonpath="{.items[*].metadata.name}"); do oc debug node/${node} -- chroot /host sudo shutdown; done`**  
+Gracefully shut down all nodes. Alternate is to cordon, drain and then poweroff all workers, then SDS, then all masters
 
 - **`for node in $(oc get nodes -o jsonpath="{.items[*].metadata.name}"); do oc debug node/${node} -- chroot /host reboot; done`**  
 Reboot the cluster (reboot all nodes).  
