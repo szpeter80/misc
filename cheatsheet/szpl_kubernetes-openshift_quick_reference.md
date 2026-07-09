@@ -35,6 +35,9 @@ Gets bucket status from Noobaa
 - **`oc patch storageclusters.ocs.openshift.io ocs-storagecluster -n openshift-storage --type json --patch '[{ "op": "replace", "path": "/spec/enableCephTools", "value": true }]'`**  
 Enable Ceph Tools in ODF
 
+- **`oc rsh -n openshift-storage $(oc get pod -n openshift-storage -l app=rook-ceph-tools -o jsonpath='{.items[0].metadata.name}') ceph status`**  
+Get ODF/Ceph health status info
+
 - **`oc rsh my-cronjob mycommand`**  
 Attempt to start a shell session in a pod for the specified resource.
 Not all container images have a working shell
