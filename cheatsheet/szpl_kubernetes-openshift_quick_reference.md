@@ -23,6 +23,12 @@ An old image, with tools like ping and dig. The successor would be ```registry.r
 - **`oc debug node/master01 -- chroot /host crictl images | egrep '^IMAGE|httpd|nginx'`**  
 Start a debug container, chroot to /host, use `crictl` to list all downloaded images and filter for header, httpd and nginx related lines
 
+- **`oc get pods -A -o jsonpath='{range .items[*].status.containerStatuses[*]} {.imageID} {"\n"} {end}' | sort | uniq`**  
+Get a list of all the actual container images used. If mirror repo used, this is the mirrored image.
+
+- **` oc get pods -A -o jsonpath='{range .items[*]}{.metadata.namespace}{"\t"}{.metadata.name}{"\t"}{range .status.containerStatuses[*]}{.imageID}{" "}{end}{"\n"}{end}'`**  
+Get a list of all the actual container images used, with the namespace and pod name. If mirror repo used, this is the mirrored image.
+
 - **`oc rsh -n openshift-monitoring alertmanager-main-0 amtool alert query --alertmanager.url http://localhost:9093`**  
 Get Alerts from the CLI
 
