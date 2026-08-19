@@ -28,7 +28,29 @@ openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt 
  ```
  openssl x509 -noout -text -in server.crt
  ```
- 
+
+**Add a server's self signed certificate to the local trust store (Debian / Ubuntu)**
+```
+SERVER="sever.example.com"; \
+PORT="443"; \
+echo -n \
+| openssl s_client -connect $SERVER:$PORT -servername "$SERVER" -showcerts 2>/dev/null \
+| sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' \
+| sudo tee "/usr/local/share/ca-certificates/$SERVER.crt" > /dev/null \
+&& sudo update-ca-certificates
+```
+
+**Add a server's self signed certificate to the local trust store (RHEL 10 / Rocky / Alma / Oracle)**
+```
+SERVER="sever.example.com"; \
+PORT="443"; \
+echo -n \
+| openssl s_client -connect $SERVER:$PORT -servername "$SERVER" -showcerts 2>/dev/null \
+| sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' \
+| sudo tee "/etc/pki/ca-trust/source/anchors/$SERVER.pem" > /dev/null \
+&& sudo update-ca-trust
+```
+
  **Convert from Microsoft binary CER -> PEM (base64 encoded text)**
 
 ```
