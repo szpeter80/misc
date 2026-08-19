@@ -21,7 +21,8 @@ openssl req -new -key server.key -out server.csr \
  **Self-sign CSR to provide CRT**
 
 ```
-openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt
+# Blindly copying extensions from the CSR is a bad practice
+openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt -copy_extensions copyall
  ```
  Verify with:  
  ```
