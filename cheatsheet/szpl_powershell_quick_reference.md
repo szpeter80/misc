@@ -9,6 +9,17 @@
 
 $PSVersionTable.PSVersion
 
+
+# Install PowerShell on Windows
+
+iex "& { $(irm https://aka.ms/install-powershell.ps1) } -UseMSI"
+
+
+# Install PowerShell on Linux
+
+wget -O - https://aka.ms/install-powershell.sh \| sudo bash
+
+
 # Get help on any cmdlet, update help
 
 Help Do-That
