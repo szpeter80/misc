@@ -5,7 +5,7 @@
 ## 01 | Housekeeping
 
 ```
-# Get Powershell version
+# Get Powershell version, source: https://github.com/PowerShell/powershell/releases
 
 $PSVersionTable.PSVersion
 
